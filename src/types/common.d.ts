@@ -13,3 +13,5 @@ type GuitarTuning = {
 type NoteDurations = "w" | "h" | "q" | "8" | "16";
 
 type SimpleNoteObj = Pick<NoteObj, "key" | "octave">;
+
+type SavedMelody =  { "notes": NoteObj[][], "date": string };

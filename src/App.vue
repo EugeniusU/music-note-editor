@@ -6,6 +6,8 @@
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey"  />
 
     <div id="output"></div>
+
+    <LoadSaved v-if="isShowList" @select-item="handleSelected" @close-list="handleCloseList" />
   </div>
 </template>
 
@@ -19,12 +21,15 @@ import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
 import { play2 } from './funcs/play';
 import GuitarKeys from './components/GuitarKeys.vue';
+import LoadSaved from './components/LoadSaved.vue';
 
 
 const infiniteNotes = shallowReactive<StaveNote[]>([]);
 const infiniteTabNotes = shallowReactive<TabNote[]>([]);
 
 const currentDuration = ref<NoteDurations>("q");
+
+const isShowList = ref(false);
 
 let factoryInit : Factory | null = null;
 
@@ -208,15 +213,11 @@ function handleSave() {
 }
 
 function handleLoad() {
-  if (factoryInit !== null) {
-    const obj = loadData(factoryInit, GUITAR_TUNE);
+  isShowList.value = true;
+}
 
-    if (obj) {
-      infiniteNotes.push(...obj.notes);
-    }
-  } else {
-    console.error("Factory init is null");
-  }
+function handleCloseList() {
+  isShowList.value = false;
 }
 
 function handleNoteDuration(v: NoteDurations) {
@@ -239,6 +240,17 @@ function handleApply() {
 
   infiniteNotes.splice(0, infiniteNotes.length);
   infiniteNotes.push(...newNotes);
+}
+
+function handleSelected(v: SavedMelody) {
+  const v2 = v.notes.map(a => {
+    const noteKeys = a.map(n => n.key + "/" + n.octave);
+    const duration = a[0]!.duration;
+
+    return makeStaveNote(noteKeys, duration);
+  });
+
+  infiniteNotes.push(...v2);
 }
 
 </script>
