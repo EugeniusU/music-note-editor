@@ -1,11 +1,11 @@
 <template>
   <div>
-    <UIControls @play="handlePlay" @save="handleSave" @load="handleLoad" @duration="handleNoteDuration" @apply="handleApply" />
+    <UIControls @play="handlePlay" @save="handleSave" @load="handleLoad" @duration="handleNoteDuration" @apply="handleApply" @selection="handleSelection" :is-selection="isSelection" />
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="5" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey"  />
 
-    <div id="output"></div>
+    <div id="output" ref="outputRef"></div>
 
     <LoadSaved v-if="isShowList" @select-item="handleSelected" @close-list="handleCloseList" />
   </div>
@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import VexFlow, { Factory, StaveNote, TabNote } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
-import { computed, onMounted, ref, shallowReactive, toValue, watch } from 'vue';
+import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
 import { f2_makeTab2, getNoteIndexFromEl, isSVGNode, loadData, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData } from './funcs/common';
 import { GUITAR_TUNE } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
@@ -30,6 +30,8 @@ const infiniteTabNotes = shallowReactive<TabNote[]>([]);
 const currentDuration = ref<NoteDurations>("q");
 
 const isShowList = ref(false);
+const isSelection = ref(false);
+const outputRef = useTemplateRef('outputRef');
 
 let factoryInit : Factory | null = null;
 
@@ -199,6 +201,49 @@ watch(currentSelectedNoteEls, (now, pre) => {
 
 })
 
+function findNode(node: Element, selector: string): Element | null {
+  let finded: Element | null = null;
+
+  for (let n = node; n.parentElement !== null; n = n.parentElement) {
+    if (n.classList.contains(selector)) {
+      finded = n;
+      break;
+    }
+  }
+
+  return finded;
+}
+
+function applySelectionEvent(event: Event) {
+  if (event.target) {
+        const f = findNode(event.target as Element, "vf-stavenote");
+
+        if (f) {
+          const noteIdx = getNoteIndexFromEl(f);
+
+          if (!currentSelectedNoteIdx.includes(noteIdx)) {
+            currentSelectedNoteIdx.push(noteIdx);
+          } else {
+            const existIdx = currentSelectedNoteIdx.findIndex(i => i === noteIdx);
+
+            currentSelectedNoteIdx.splice(existIdx, 1);
+          }
+        }
+      }
+}
+
+watch(isSelection, () => {
+  if (outputRef.value) {
+    if (isSelection.value) {
+      outputRef.value.addEventListener("mouseover", applySelectionEvent);
+    } else {
+      outputRef.value.removeEventListener("mouseover", applySelectionEvent);
+
+      currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
+    }
+  }
+});
+
 onMounted(() => {
   factoryInit = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 }});
 });
@@ -251,6 +296,10 @@ function handleSelected(v: SavedMelody) {
   });
 
   infiniteNotes.push(...v2);
+}
+
+function handleSelection() {
+  isSelection.value = !isSelection.value;
 }
 
 </script>

@@ -5,7 +5,7 @@
         <button id='reset'>Reset</button>
         <button id='save' @click="save()">Save</button>
         <button id='load' @click="load()">Load</button>
-        <button id='testSelection'>testSelection</button>
+        <button id='testSelection' @click="selection()" :style="{ backgroundColor: isSelection ? 'lightgreen' : '' }">testSelection</button>
 
         <label id='isShowGuitar'>Show guitar?</label>
         <input type='checkbox' for='isShowGuitar' id='isShowGuitarInput' checked="true">
@@ -39,7 +39,14 @@ const emit = defineEmits<{
     load: [];
     duration: [v: NoteDurations]
     apply: [];
+    selection: [];
 }>();
+
+const props = withDefaults(defineProps<{
+    isSelection: boolean;
+}>(), {
+    isSelection: false,
+});
 
 const noteDuration = ref<NoteDurations>("q");
 
@@ -61,6 +68,10 @@ function changeNoteDuration() {
 
 function apply() {
     emit("apply");
+}
+
+function selection() {
+    emit("selection")
 }
 
 </script>
