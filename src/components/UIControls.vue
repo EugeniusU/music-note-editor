@@ -7,8 +7,8 @@
         <button id='load' @click="load()">Load</button>
         <button id='testSelection' @click="selection()" :style="{ backgroundColor: isSelection ? 'lightgreen' : '' }">testSelection</button>
 
-        <label id='isShowGuitar'>Show guitar?</label>
-        <input type='checkbox' for='isShowGuitar' id='isShowGuitarInput' checked="true">
+        <label for='isShowGuitar'>Show guitar?</label>
+        <input type='checkbox' name='isShowGuitar' id="isShowGuitar" v-model="isShowGuitarRef">
 
         <label>Note Duration</label>
         <select v-model="noteDuration" @change="changeNoteDuration">
@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const emit = defineEmits<{
     play: [];
@@ -40,15 +40,23 @@ const emit = defineEmits<{
     duration: [v: NoteDurations]
     apply: [];
     selection: [];
+    switchShowGuitar: [];
 }>();
 
 const props = withDefaults(defineProps<{
     isSelection: boolean;
+    isShowGuitar: boolean;
 }>(), {
     isSelection: false,
+    isShowGuitar: true,
 });
 
 const noteDuration = ref<NoteDurations>("q");
+const isShowGuitarRef = ref(props.isShowGuitar);
+
+watch(isShowGuitarRef, () => {
+    switchShowGuitar();
+});
 
 function play() {
     emit("play");
@@ -72,6 +80,10 @@ function apply() {
 
 function selection() {
     emit("selection")
+}
+
+function switchShowGuitar() {
+    emit("switchShowGuitar");
 }
 
 </script>

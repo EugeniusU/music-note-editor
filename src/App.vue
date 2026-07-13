@@ -1,9 +1,19 @@
 <template>
   <div>
-    <UIControls @play="handlePlay" @save="handleSave" @load="handleLoad" @duration="handleNoteDuration" @apply="handleApply" @selection="handleSelection" :is-selection="isSelection" />
+    <UIControls 
+      @play="handlePlay" 
+      @save="handleSave" 
+      @load="handleLoad" 
+      @duration="handleNoteDuration" 
+      @apply="handleApply" 
+      @selection="handleSelection" 
+      :is-selection="isSelection" 
+      :is-show-guitar="isShowGuitar"
+      @switch-show-guitar="handleShowGuitar"
+    />
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="5" />
-    <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey"  />
+    <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
 
     <div id="output" ref="outputRef"></div>
 
@@ -31,6 +41,7 @@ const currentDuration = ref<NoteDurations>("q");
 
 const isShowList = ref(false);
 const isSelection = ref(false);
+const isShowGuitar = ref(true);
 const outputRef = useTemplateRef('outputRef');
 
 let factoryInit : Factory | null = null;
@@ -300,6 +311,10 @@ function handleSelected(v: SavedMelody) {
 
 function handleSelection() {
   isSelection.value = !isSelection.value;
+}
+
+function handleShowGuitar() {
+  isShowGuitar.value = !isShowGuitar.value;
 }
 
 </script>
