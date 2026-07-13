@@ -63,7 +63,7 @@ function makeStaveNote(keys: string[], duration: string): StaveNote {
 }
 
 function noteObjToStaveNote(note: NoteObj): StaveNote {
-    const noteKey = note.key + "/" + note.octave;
+    const noteKey = makeStaveKeyFromNoteObj(note);
     const duration = note.duration;
 
     return makeStaveNote([noteKey], duration);
@@ -96,7 +96,7 @@ function handleTouchNote(note: NoteObj) {
     } else {
       const duration = note.duration;
       const existKeys = existNote.getKeys();
-      const noteKey = note.key + "/" + note.octave;
+      const noteKey = makeStaveKeyFromNoteObj(note);
 
       const n1 = makeStaveNote([...existKeys, noteKey], duration);
       infiniteNotes.splice(changedNoteIdx, 1, n1);
@@ -300,7 +300,7 @@ function handleApply() {
 
 function handleSelected(v: SavedMelody) {
   const v2 = v.notes.map(a => {
-    const noteKeys = a.map(n => n.key + "/" + n.octave);
+    const noteKeys = a.map(makeStaveKeyFromNoteObj);
     const duration = a[0]!.duration;
 
     return makeStaveNote(noteKeys, duration);
@@ -315,6 +315,10 @@ function handleSelection() {
 
 function handleShowGuitar() {
   isShowGuitar.value = !isShowGuitar.value;
+}
+
+function makeStaveKeyFromNoteObj(n: NoteObj): string {
+  return n.key + "/" + n.octave;
 }
 
 </script>
