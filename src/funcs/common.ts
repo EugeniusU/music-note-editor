@@ -241,4 +241,14 @@ function isFactory(f: unknown): f is Factory {
   return f instanceof Factory;
 }
 
-export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode }
+function makeCMajor(octave = 1, duration = 'q' as NoteDurations): NoteObj[] {
+    const keys = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
+
+    const keys2 = [...keys, ...keys.reverse()];
+
+    const notes: NoteObj[] = keys2.map(k => ({ key: k, octave: octave, duration: duration, isSharp: false }));
+
+    return notes;
+}
+
+export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor }

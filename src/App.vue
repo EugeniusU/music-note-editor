@@ -12,12 +12,16 @@
       @switch-show-guitar="handleShowGuitar"
     />
 
+    <button @click="handleTest()">Test</button>
+
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="5" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
 
     <div id="output" ref="outputRef"></div>
 
     <LoadSaved v-if="isShowList" @select-item="handleSelected" @close-list="handleCloseList" />
+
+
   </div>
 </template>
 
@@ -25,7 +29,7 @@
 import VexFlow, { Factory, StaveNote, TabNote } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
-import { f2_makeTab2, getNoteIndexFromEl, isSVGNode, loadData, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData } from './funcs/common';
+import { f2_makeTab2, getNoteIndexFromEl, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData } from './funcs/common';
 import { GUITAR_TUNE } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
@@ -319,6 +323,17 @@ function handleShowGuitar() {
 
 function makeStaveKeyFromNoteObj(n: NoteObj): string {
   return n.key + "/" + n.octave;
+}
+
+function handleTest() {
+  const notes = makeCMajor(4);
+
+  const noteKeys = notes.map(makeStaveKeyFromNoteObj);
+  const d = 'q';
+
+  const n1 = noteKeys.map(k => makeStaveNote([k], d));
+
+  infiniteNotes.push(...n1);
 }
 
 </script>
