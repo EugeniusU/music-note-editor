@@ -14,7 +14,7 @@
 
     <button @click="handleTest()">Test</button>
 
-    <PianoKeys @touch-note-key="handleTouchNote" :octaves="5" />
+    <PianoKeys @touch-note-key="handleTouchNote" :octaves="6" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
 
     <div id="output" ref="outputRef"></div>

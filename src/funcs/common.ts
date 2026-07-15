@@ -20,7 +20,7 @@ function getGuitarFretsFromNote(note: string, noteKeys: typeof NOTE_KEYS, guitar
 
 function getGuitarNotesMap(noteKeys: typeof NOTE_KEYS, guitarTuning: GuitarTuning, maxFret = 24) {
     const map: { [key: string]: string[] } = {};
-    const allPianoNotes = getPianoNotes(noteKeys, 'C', 5);
+    const allPianoNotes = getPianoNotes(noteKeys, 'C', 6);
 
     Object.entries(guitarTuning).forEach(pair => {
         const string = pair[0];
