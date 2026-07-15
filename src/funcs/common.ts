@@ -251,4 +251,18 @@ function makeCMajor(octave = 1, duration = 'q' as NoteDurations): NoteObj[] {
     return notes;
 }
 
-export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor }
+function guitarToPianoRange(guitarFrets: { [key: string]: string[] }, pianoKeys: string[]) {
+    const gStrings = Object.keys(guitarFrets);
+    const gHighString = gStrings.reduce((a, b) => a < b ? a : b);
+    const gLowString = gStrings.reduce((a, b) => a > b ? a : b);
+
+    const gMinKey = guitarFrets[gLowString]![0]!;
+    const gMaxKey = guitarFrets[gHighString]!.at(-1)!;
+
+    const minIdx = pianoKeys.findIndex(k => k === gMinKey);
+    const maxIdx = pianoKeys.findIndex(k => k === gMaxKey);
+
+    return { min: { key: gMinKey, index: minIdx }, max: { key: gMaxKey, index: maxIdx } };
+}
+
+export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange }

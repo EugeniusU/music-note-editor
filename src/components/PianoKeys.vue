@@ -4,13 +4,15 @@
             v-for="(note, i) in pianoKeys"
             :key="i"
             :class="note.isSharp ? 'sharp' : ''"
-            @click="handleClickPianoKey(note)"
+            @click="handleClickPianoKey(note, i)"
+            :style="isOverBounds(i) ? 'background: lightgrey' : ''"
         >{{ note.key + note.octave }}</div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { NOTE_KEYS } from '@/constants/common';
+import { GUITAR_TUNE, NOTE_KEYS } from '@/constants/common';
+import { getGuitarNotesMap, getPianoNotes, guitarToPianoRange } from '@/funcs/common';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -40,8 +42,23 @@ const pianoKeys = computed<NoteObj[]>(() => {
     return notes;
 });
 
-function handleClickPianoKey(noteObj: NoteObj) {
+function handleClickPianoKey(noteObj: NoteObj, index: number) {
+    if (isOverBounds(index)) {
+        console.warn("disabled");
+        return null;
+    }
+
     emit("touchNoteKey", noteObj);
+}
+
+const range = guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", props.octaves));
+
+function isOverBounds(index: number) {
+    if (index < range.min.index || index > range.max.index) {
+        return true;
+    }
+
+    return false;
 }
 
 </script>
