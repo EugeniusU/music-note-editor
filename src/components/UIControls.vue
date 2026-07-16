@@ -22,8 +22,8 @@
         <button id='pause'>Pause</button>
 
         <label>Transpose</label>
-        <input type='number' min='-24' max='24' step='1' value='1' id='transposeInput'>
-        <button id='transposeButton'>make</button>
+        <input type='number' min='-24' max='24' step='1' v-model="transposeInputValue">
+        <button id='transposeButton' @click="makeTranspose">make</button>
 
         <label>Apply changes</label>
         <button id='apply' @click="apply()">Apply</button>
@@ -41,6 +41,7 @@ const emit = defineEmits<{
     apply: [];
     selection: [];
     switchShowGuitar: [];
+    transpose: [v: number];
 }>();
 
 const props = withDefaults(defineProps<{
@@ -53,6 +54,7 @@ const props = withDefaults(defineProps<{
 
 const noteDuration = ref<NoteDurations>("q");
 const isShowGuitarRef = ref(props.isShowGuitar);
+const transposeInputValue = ref(1);
 
 watch(isShowGuitarRef, () => {
     switchShowGuitar();
@@ -84,6 +86,10 @@ function selection() {
 
 function switchShowGuitar() {
     emit("switchShowGuitar");
+}
+
+function makeTranspose() {
+    emit("transpose", transposeInputValue.value);
 }
 
 </script>

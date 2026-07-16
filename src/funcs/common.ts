@@ -265,4 +265,28 @@ function guitarToPianoRange(guitarFrets: { [key: string]: string[] }, pianoKeys:
     return { min: { key: gMinKey, index: minIdx }, max: { key: gMaxKey, index: maxIdx } };
 }
 
-export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange }
+function transpose(note: string, index: number) {
+    const allPianoNotes = getPianoNotes(NOTE_KEYS, 'C', 6);
+    const idx = allPianoNotes.indexOf(note);
+
+    if (idx > -1) {
+        const idx2 = idx + index;
+        const note2 = allPianoNotes[idx2];
+
+        if (note2) {
+            if (!isNaN(Number(note2.at(-1)))) {
+                const tmp = note2.split("");
+                tmp.splice(tmp.length - 1, 0, "/")
+                
+                return tmp.join("");
+            }
+
+            return note2;
+        }
+        
+    }
+
+    return "";
+}
+
+export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange, transpose }

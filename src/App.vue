@@ -10,6 +10,7 @@
       :is-selection="isSelection" 
       :is-show-guitar="isShowGuitar"
       @switch-show-guitar="handleShowGuitar"
+      @transpose="handleTranspose"
     />
 
     <button @click="handleTest()">Test</button>
@@ -29,7 +30,7 @@
 import VexFlow, { Factory, StaveNote, TabNote } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
-import { f2_makeTab2, getNoteIndexFromEl, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData } from './funcs/common';
+import { f2_makeTab2, getNoteIndexFromEl, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose } from './funcs/common';
 import { GUITAR_TUNE } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
@@ -334,6 +335,21 @@ function handleTest() {
   const n1 = noteKeys.map(k => makeStaveNote([k], d));
 
   infiniteNotes.push(...n1);
+}
+
+function handleTranspose(v: number) {
+  const idx = currentSelectedNoteIdx;
+  const noteObjs = idx.map(i => ({ index: i, note: infiniteNotes[i]})).filter((n) : n is { index: number; note: StaveNote } => n.note !== undefined);
+
+  if (noteObjs.length !== idx.length) {
+    console.error("Can not find some notes by index");
+  }
+
+  const transposedNotes = noteObjs.map(n => ({ index: n.index, note: makeStaveNote([...n.note.getKeys().map(k => transpose(k.replace("/", "").toUpperCase(), v))], n.note.getDuration()) }));
+  const newNotes = replaceNotes(toValue(infiniteNotes), transposedNotes);
+
+  infiniteNotes.splice(0, infiniteNotes.length);
+  infiniteNotes.push(...newNotes);
 }
 
 </script>
