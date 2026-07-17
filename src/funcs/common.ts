@@ -286,7 +286,7 @@ function transpose(note: string, index: number) {
         
     }
 
-    return "";
+    return null;
 }
 
 export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange, transpose }

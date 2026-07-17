@@ -30,8 +30,8 @@
 import VexFlow, { Factory, StaveNote, TabNote } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
-import { f2_makeTab2, getNoteIndexFromEl, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose } from './funcs/common';
-import { GUITAR_TUNE } from './constants/common';
+import { f2_makeTab2, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose } from './funcs/common';
+import { GUITAR_TUNE, NOTE_KEYS } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
 import { play2 } from './funcs/play';
@@ -343,6 +343,21 @@ function handleTranspose(v: number) {
 
   if (noteObjs.length !== idx.length) {
     console.error("Can not find some notes by index");
+  }
+
+  const range = guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", 6));
+  const pianoKeys = getPianoNotes(NOTE_KEYS, "C", 6);
+
+  const getKeyIndex = (key: string) => {
+    return pianoKeys.indexOf(key.replace("/", "").toUpperCase());
+  };
+
+  if (noteObjs.some(n => n.note.getKeys().map(k => transpose(k.replace("/", "").toUpperCase(), v)).some(k => k === null || (getKeyIndex(k) < range.min.index) || (getKeyIndex(k) > range.max.index)))) {
+    console.warn("Can not transposing some notes, possibly out of range");
+
+    alert("Can not transposing some notes, possibly out of range");
+
+    return null;
   }
 
   const transposedNotes = noteObjs.map(n => ({ index: n.index, note: makeStaveNote([...n.note.getKeys().map(k => transpose(k.replace("/", "").toUpperCase(), v))], n.note.getDuration()) }));
