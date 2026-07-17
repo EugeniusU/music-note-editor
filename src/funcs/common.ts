@@ -1,4 +1,4 @@
-import { NOTE_KEYS } from "@/constants/common";
+import { NOTE_KEYS, PIANO_OCTAVES } from "@/constants/common";
 import { StaveNote, VexFlow, Factory, type KeyProps } from "vexflow";
 import type { Reactive, Ref } from "vue";
 
@@ -20,7 +20,7 @@ function getGuitarFretsFromNote(note: string, noteKeys: typeof NOTE_KEYS, guitar
 
 function getGuitarNotesMap(noteKeys: typeof NOTE_KEYS, guitarTuning: GuitarTuning, maxFret = 24) {
     const map: { [key: string]: string[] } = {};
-    const allPianoNotes = getPianoNotes(noteKeys, 'C', 6);
+    const allPianoNotes = getPianoNotes(noteKeys, 'C', PIANO_OCTAVES);
 
     Object.entries(guitarTuning).forEach(pair => {
         const string = pair[0];
@@ -266,7 +266,7 @@ function guitarToPianoRange(guitarFrets: { [key: string]: string[] }, pianoKeys:
 }
 
 function transpose(note: string, index: number) {
-    const allPianoNotes = getPianoNotes(NOTE_KEYS, 'C', 6);
+    const allPianoNotes = getPianoNotes(NOTE_KEYS, 'C', PIANO_OCTAVES);
     const idx = allPianoNotes.indexOf(note);
 
     if (idx > -1) {

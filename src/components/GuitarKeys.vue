@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { GUITAR_TUNE, NOTE_KEYS } from '@/constants/common';
+import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES } from '@/constants/common';
 import { getGuitarFretsFromNote, getPianoNotes } from '@/funcs/common';
 import { computed, ref } from 'vue';
 
@@ -81,7 +81,7 @@ function showNoteFromFretMap(f: boolean, stringNum: string, fretNum: number) {
 
 function getNoteFromGuitarFret(fret: number, string: keyof typeof GUITAR_TUNE) {
     const openStringNote = GUITAR_TUNE[string];
-    const pianoNotes = getPianoNotes(NOTE_KEYS, "C", 6);
+    const pianoNotes = getPianoNotes(NOTE_KEYS, "C", PIANO_OCTAVES);
 
     const fOpenIdx = pianoNotes.findIndex(k => k === openStringNote);
 

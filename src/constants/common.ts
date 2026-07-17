@@ -18,4 +18,6 @@ const GUITAR_TUNE = {
     '6': 'E2',
 } as const;
 
-export { NOTE_KEYS, DURATION_MAP, GUITAR_TUNE }
+const PIANO_OCTAVES = 6;
+
+export { NOTE_KEYS, DURATION_MAP, GUITAR_TUNE, PIANO_OCTAVES }
