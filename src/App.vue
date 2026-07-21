@@ -30,7 +30,7 @@
 import VexFlow, { Factory, StaveNote, TabNote } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
-import { f2_makeTab2, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose } from './funcs/common';
+import { f2_makeTab2, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
 import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
@@ -337,7 +337,7 @@ function handleTest() {
   infiniteNotes.push(...n1);
 }
 
-function handleTranspose(v: number) {
+function handleTranspose(offset: number) {
   const idx = currentSelectedNoteIdx;
   const noteObjs = idx.map(i => ({ index: i, note: infiniteNotes[i]})).filter((n) : n is { index: number; note: StaveNote } => n.note !== undefined);
 
@@ -346,13 +346,8 @@ function handleTranspose(v: number) {
   }
 
   const range = guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", 6));
-  const pianoKeys = getPianoNotes(NOTE_KEYS, "C", PIANO_OCTAVES);
 
-  const getKeyIndex = (key: string) => {
-    return pianoKeys.indexOf(key.replace("/", "").toUpperCase());
-  };
-
-  if (noteObjs.some(n => n.note.getKeys().map(k => transpose(k.replace("/", "").toUpperCase(), v)).some(k => k === null || (getKeyIndex(k) < range.min.index) || (getKeyIndex(k) > range.max.index)))) {
+  if (noteObjs.some(n => noteObjFromNote2(n.note).some(obj => !isSafeTransposing(obj, offset, range.min.index, range.max.index)))) {
     console.warn("Can not transposing some notes, possibly out of range");
 
     alert("Can not transposing some notes, possibly out of range");
@@ -360,7 +355,7 @@ function handleTranspose(v: number) {
     return null;
   }
 
-  const transposedNotes = noteObjs.map(n => ({ index: n.index, note: makeStaveNote([...n.note.getKeys().map(k => transpose(k.replace("/", "").toUpperCase(), v))], n.note.getDuration()) }));
+  const transposedNotes = noteObjs.map(n => ({ index: n.index, note: makeStaveNote(noteObjFromNote2(n.note).map(obj => transpose2(obj, offset)).map(makeStaveKeyFromNoteObj), n.note.getDuration()) }));
   const newNotes = replaceNotes(toValue(infiniteNotes), transposedNotes);
 
   infiniteNotes.splice(0, infiniteNotes.length);

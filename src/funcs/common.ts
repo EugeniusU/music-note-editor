@@ -289,4 +289,32 @@ function transpose(note: string, index: number) {
     return null;
 }
 
-export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange, transpose }
+type NoteKey = typeof NOTE_KEYS[number];
+
+function transpose2(n: NoteObj, offset: number): NoteObj {
+  const idx = NOTE_KEYS.indexOf(n.key as NoteKey) + (n.octave - 1) * NOTE_KEYS.length;
+  const newIdx = idx + offset;
+
+  const octave = Math.floor((newIdx) / NOTE_KEYS.length) + 1;
+  const keyIdx = newIdx % NOTE_KEYS.length;
+  const key = NOTE_KEYS[keyIdx]!;
+
+  return { key: key, octave: octave, duration: n.duration, isSharp: key.includes("#") };
+}
+
+function isSafeTransposing(n: NoteObj, offset: number, minIndex: number, maxIndex: number) {
+  const idx = NOTE_KEYS.indexOf(n.key as NoteKey) + (n.octave - 1) * NOTE_KEYS.length;
+  const newIdx = idx + offset;
+
+  if (newIdx < 0) {
+    return false;
+  }
+
+  if (newIdx < minIndex || newIdx > maxIndex) {
+    return false;
+  }
+
+  return true;
+}
+
+export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange, transpose, transpose2, isSafeTransposing }
