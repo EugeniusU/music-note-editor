@@ -27,6 +27,8 @@
 
         <label>Apply changes</label>
         <button id='apply' @click="apply()">Apply</button>
+
+        <button @click="clearAllNotes()">Clear all notes</button>
     </div>
 </template>
 
@@ -42,6 +44,7 @@ const emit = defineEmits<{
     selection: [];
     switchShowGuitar: [];
     transpose: [v: number];
+    clearAllNotes: [];
 }>();
 
 const props = withDefaults(defineProps<{
@@ -90,6 +93,10 @@ function switchShowGuitar() {
 
 function makeTranspose() {
     emit("transpose", transposeInputValue.value);
+}
+
+function clearAllNotes() {
+    emit("clearAllNotes");
 }
 
 </script>

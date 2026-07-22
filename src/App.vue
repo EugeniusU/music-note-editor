@@ -11,6 +11,7 @@
       :is-show-guitar="isShowGuitar"
       @switch-show-guitar="handleShowGuitar"
       @transpose="handleTranspose"
+      @clear-all-notes="handleClearAllNotes"
     />
 
     <button @click="handleTest()">Test</button>
@@ -360,6 +361,16 @@ function handleTranspose(offset: number) {
 
   infiniteNotes.splice(0, infiniteNotes.length);
   infiniteNotes.push(...newNotes);
+}
+
+function handleClearAllNotes() {
+  const f = confirm("Are you sure for clear all notes?");
+
+  if (!f) {
+    return null;
+  }
+
+  infiniteNotes.splice(0, infiniteNotes.length);
 }
 
 </script>
