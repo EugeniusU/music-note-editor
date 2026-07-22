@@ -258,7 +258,7 @@ watch(isSelection, () => {
     } else {
       outputRef.value.removeEventListener("mouseover", applySelectionEvent);
 
-      currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
+      resetSelection();
     }
   }
 });
@@ -375,15 +375,19 @@ function handleClearAllNotes() {
   infiniteNotes.splice(0, infiniteNotes.length);
 }
 
+function resetSelection() {
+  currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
+}
+
 function handleSelectAllNotes() {
   const indexes = infiniteNotes.map((_, i) => i);
 
-  currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
+  resetSelection();
   currentSelectedNoteIdx.push(...indexes);
 }
 
 function handleResetSelection() {
-  currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
+  resetSelection();
 }
 
 </script>
