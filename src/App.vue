@@ -12,6 +12,8 @@
       @switch-show-guitar="handleShowGuitar"
       @transpose="handleTranspose"
       @clear-all-notes="handleClearAllNotes"
+      @select-all-notes="handleSelectAllNotes"
+      @reset-selection="handleResetSelection"
     />
 
     <button @click="handleTest()">Test</button>
@@ -371,6 +373,17 @@ function handleClearAllNotes() {
   }
 
   infiniteNotes.splice(0, infiniteNotes.length);
+}
+
+function handleSelectAllNotes() {
+  const indexes = infiniteNotes.map((_, i) => i);
+
+  currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
+  currentSelectedNoteIdx.push(...indexes);
+}
+
+function handleResetSelection() {
+  currentSelectedNoteIdx.splice(0, currentSelectedNoteIdx.length);
 }
 
 </script>

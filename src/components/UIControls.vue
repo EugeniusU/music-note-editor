@@ -6,6 +6,8 @@
         <button id='save' @click="save()">Save</button>
         <button id='load' @click="load()">Load</button>
         <button id='testSelection' @click="selection()" :style="{ backgroundColor: isSelection ? 'lightgreen' : '' }">testSelection</button>
+        <button @click="selectAllNotes()">Select all notes</button>
+        <button @click="resetSelection()">Reset selection</button>
 
         <label for='isShowGuitar'>Show guitar?</label>
         <input type='checkbox' name='isShowGuitar' id="isShowGuitar" v-model="isShowGuitarRef">
@@ -45,6 +47,8 @@ const emit = defineEmits<{
     switchShowGuitar: [];
     transpose: [v: number];
     clearAllNotes: [];
+    selectAllNotes: [];
+    resetSelection: [];
 }>();
 
 const props = withDefaults(defineProps<{
@@ -97,6 +101,14 @@ function makeTranspose() {
 
 function clearAllNotes() {
     emit("clearAllNotes");
+}
+
+function selectAllNotes() {
+    emit("selectAllNotes");
+}
+
+function resetSelection() {
+    emit("resetSelection");
 }
 
 </script>
