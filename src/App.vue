@@ -17,6 +17,7 @@
     />
 
     <button @click="handleTest()">Test</button>
+    <button @click="findOptimalTabs()">Test optimal tabs</button>
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
@@ -30,10 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import VexFlow, { Factory, StaveNote, TabNote } from 'vexflow';
+import VexFlow, { Factory, StaveNote, TabNote, type TabNotePosition } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
-import { f2_makeTab2, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
+import { f2_makeTab2, getGuitarFretsFromNote, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
 import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
@@ -388,6 +389,83 @@ function handleSelectAllNotes() {
 
 function handleResetSelection() {
   resetSelection();
+}
+
+function findOptimalTabs() {
+  const positions = infiniteTabNotes.map(t => t.getPositions());
+  const durations = infiniteTabNotes.map(t => t.getDuration());
+
+  const f: Array<{ str: number; fret: number | string }> = positions.map(a => a[0]!);
+
+  const frets = f.map(obj => +obj.fret);
+  const sortedFrets = frets.map(obj => obj).sort();
+
+  const uniqFrets: number[] = [];
+  sortedFrets.forEach(v => !uniqFrets.includes(v) ? uniqFrets.push(v) : null);
+
+  const medianIdx = Math.ceil(uniqFrets.length / 2);
+
+  const v = prompt("Insert needed fret number for align");
+  const numV = v && !isNaN(Number(v)) ? Number(v) : null;
+
+  const medianFret = numV || uniqFrets[medianIdx]!;
+
+  const t: { str: string; fret: number }[] = [];
+  const notes = getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE);
+
+  positions.forEach(a => {
+    const p = a[0]!;
+    const s = p.str;
+    const f = +p.fret;
+
+    const note = notes[s]![f]!;
+
+    const posVariants = getGuitarFretsFromNote(note, NOTE_KEYS, GUITAR_TUNE);
+
+    let currentOptimalFret: number | null = null;
+    let currentOptimalString: string | null = null;
+
+    Object.keys(posVariants).forEach(s => {
+      const f2 = posVariants[s]!;
+
+      if (currentOptimalFret === null) {
+        currentOptimalFret = f2;
+        currentOptimalString = s;
+      } else {
+        if (Math.abs(currentOptimalFret - medianFret) > Math.abs(f2 - medianFret)) {
+          currentOptimalFret = f2;
+          currentOptimalString = s;
+        }
+      }
+    });
+
+    const openString = Object.keys(posVariants).find(s => posVariants[s] === 0);
+
+    if (openString) {
+      currentOptimalString = openString;
+      currentOptimalFret = +posVariants[openString]!;
+    }
+
+    t.push({ str: currentOptimalString!, fret: currentOptimalFret! });
+  });
+
+  const tabNotes = t.map((obj, i) => {
+    const duration = durations[i] || 'q';
+    const f2 = [{ str: +obj.str, fret: obj.fret }];
+    const n2 = new VexFlow.TabNote({ positions: [...f2], duration: duration }).setFont('Arial', 14, 'bold');
+
+    return n2;
+  });
+
+  const infiniteNotesCopy = toValue(infiniteNotes);
+  infiniteTabNotes.splice(0, infiniteTabNotes.length);
+
+  infiniteTabNotes.push(...tabNotes);
+  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
+
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800);
+
+  isRenderingUpdates.value = true;
 }
 
 </script>
