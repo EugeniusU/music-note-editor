@@ -18,6 +18,7 @@
 
     <button @click="handleTest()">Test</button>
     <button @click="findOptimalTabs()">Test optimal tabs</button>
+    <button @click="findOptimalTabs2()">Test optimal tabs pairs</button>
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
@@ -391,6 +392,9 @@ function handleResetSelection() {
   resetSelection();
 }
 
+/**
+ * aligning for given fret number or middle index
+ */
 function findOptimalTabs() {
   const positions = infiniteTabNotes.map(t => t.getPositions());
   const durations = infiniteTabNotes.map(t => t.getDuration());
@@ -450,6 +454,84 @@ function findOptimalTabs() {
   });
 
   const tabNotes = t.map((obj, i) => {
+    const duration = durations[i] || 'q';
+    const f2 = [{ str: +obj.str, fret: obj.fret }];
+    const n2 = new VexFlow.TabNote({ positions: [...f2], duration: duration }).setFont('Arial', 14, 'bold');
+
+    return n2;
+  });
+
+  const infiniteNotesCopy = toValue(infiniteNotes);
+  infiniteTabNotes.splice(0, infiniteTabNotes.length);
+
+  infiniteTabNotes.push(...tabNotes);
+  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
+
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800);
+
+  isRenderingUpdates.value = true;
+}
+
+/**
+ * aligning for each pair in all sequence
+ */
+function findOptimalTabs2() {
+  const positions = infiniteTabNotes.map(t => t.getPositions());
+  const durations = infiniteTabNotes.map(t => t.getDuration());
+
+  const f: Array<{ str: number; fret: number | string }> = positions.map(a => a[0]!);
+
+  if (f.length === 1) {
+    return null;
+  }
+
+  const notes = getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE);
+
+  const optimizedPos = [];
+
+  let prev = f[0]!;
+  optimizedPos.push(prev);
+
+  for (let i = 1; i < f.length; i++) {
+    const pos = f[i]!;
+
+    const s = pos.str;
+    const f2 = +pos.fret;
+
+    const note = notes[s]![f2]!;
+
+    const posVariants = getGuitarFretsFromNote(note, NOTE_KEYS, GUITAR_TUNE);
+
+    let currentOptimalFret: number | null = null;
+    let currentOptimalString: string | null = null;
+
+    Object.keys(posVariants).forEach(s => {
+      const f3 = posVariants[s]!;
+
+      if (currentOptimalFret === null) {
+        currentOptimalFret = f3;
+        currentOptimalString = s;
+      } else {
+        if (Math.abs(currentOptimalFret - (+prev.fret)) > Math.abs(f3 - (+prev.fret))) {
+          currentOptimalFret = f3;
+          currentOptimalString = s;
+        }
+      }
+    });
+
+    const openString = Object.keys(posVariants).find(s => posVariants[s] === 0);
+
+    if (openString) {
+      currentOptimalString = openString;
+      currentOptimalFret = +posVariants[openString]!;
+    }
+
+    optimizedPos.push({ str: currentOptimalString!, fret: currentOptimalFret! });
+
+    prev = { str: +currentOptimalString!, fret: +currentOptimalFret! };
+  }
+
+  const tabNotes = optimizedPos.map((obj, i) => {
     const duration = durations[i] || 'q';
     const f2 = [{ str: +obj.str, fret: obj.fret }];
     const n2 = new VexFlow.TabNote({ positions: [...f2], duration: duration }).setFont('Arial', 14, 'bold');
