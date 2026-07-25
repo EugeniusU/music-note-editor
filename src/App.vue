@@ -9,19 +9,24 @@
       @selection="handleSelection" 
       :is-selection="isSelection" 
       :is-show-guitar="isShowGuitar"
+      :is-show-violin="isShowViolin"
+      :tabs-for-instrument="isViolinTabs ? 'violin' : 'guitar'"
       @switch-show-guitar="handleShowGuitar"
+      @switch-show-violin="handleShowViolin"
       @transpose="handleTranspose"
       @clear-all-notes="handleClearAllNotes"
       @select-all-notes="handleSelectAllNotes"
       @reset-selection="handleResetSelection"
+      @switch-tabs-for-instrument="handleSwitchTabsForInstrument"
     />
 
     <button @click="handleTest()">Test</button>
-    <button @click="findOptimalTabs()">Test optimal tabs</button>
-    <button @click="findOptimalTabs2()">Test optimal tabs pairs</button>
+    <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs</button>
+    <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs pairs</button>
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
+    <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
 
     <div id="output" ref="outputRef"></div>
 
@@ -36,12 +41,13 @@ import VexFlow, { Factory, StaveNote, TabNote, type TabNotePosition } from 'vexf
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
 import { f2_makeTab2, getGuitarFretsFromNote, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
-import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES } from './constants/common';
+import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
 import { play2 } from './funcs/play';
 import GuitarKeys from './components/GuitarKeys.vue';
 import LoadSaved from './components/LoadSaved.vue';
+import ViolinKeys from './components/ViolinKeys.vue';
 
 
 const infiniteNotes = shallowReactive<StaveNote[]>([]);
@@ -52,7 +58,11 @@ const currentDuration = ref<NoteDurations>("q");
 const isShowList = ref(false);
 const isSelection = ref(false);
 const isShowGuitar = ref(true);
+const isShowViolin = ref(false);
+
 const outputRef = useTemplateRef('outputRef');
+
+const isViolinTabs = ref(true);
 
 let factoryInit : Factory | null = null;
 
@@ -132,13 +142,17 @@ watch(infiniteNotes, async () => {
       return n2;
     } 
     
+    if (isViolinTabs.value) {
+      return f2_makeTab2(noteObjFromNote2(n), VIOLIN_TUNE);
+    }
+
     return f2_makeTab2(noteObjFromNote2(n), GUITAR_TUNE);
   });
 
   infiniteTabNotes.push(...tabs);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
 
   isRenderingUpdates.value = true;
 });
@@ -327,6 +341,43 @@ function handleShowGuitar() {
   isShowGuitar.value = !isShowGuitar.value;
 }
 
+function handleShowViolin() {
+  isShowViolin.value = !isShowViolin.value;
+}
+
+function handleSwitchTabsForInstrument(v: TabsForInstruments) {
+  if (v === "violin") {
+    isViolinTabs.value = true;
+  } else {
+    isViolinTabs.value = false;
+  }
+
+  const infiniteNotesCopy = toValue(infiniteNotes);
+  infiniteTabNotes.splice(0, infiniteTabNotes.length);
+
+  const tabs = infiniteNotesCopy.map(n => {
+    if (n.isRest()) {
+      const d = n.getDuration();
+      const n2 = new VexFlow.TabNote({ positions: [{ str: 1, fret: 'r' }], duration: d + 'r' }).setFont('Arial', 14, 'bold');
+
+      return n2;
+    } 
+    
+    if (isViolinTabs.value) {
+      return f2_makeTab2(noteObjFromNote2(n), VIOLIN_TUNE);
+    }
+
+    return f2_makeTab2(noteObjFromNote2(n), GUITAR_TUNE);
+  });
+
+  infiniteTabNotes.push(...tabs);
+  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
+
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
+
+  isRenderingUpdates.value = true;
+}
+
 function makeStaveKeyFromNoteObj(n: NoteObj): string {
   return n.key + "/" + n.octave;
 }
@@ -395,7 +446,7 @@ function handleResetSelection() {
 /**
  * aligning for given fret number or middle index
  */
-function findOptimalTabs() {
+function findOptimalTabs(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   const positions = infiniteTabNotes.map(t => t.getPositions());
   const durations = infiniteTabNotes.map(t => t.getDuration());
 
@@ -415,7 +466,7 @@ function findOptimalTabs() {
   const medianFret = numV || uniqFrets[medianIdx]!;
 
   const t: { str: string; fret: number }[] = [];
-  const notes = getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE);
+  const notes = getGuitarNotesMap(NOTE_KEYS, tuning);
 
   positions.forEach(a => {
     const p = a[0]!;
@@ -424,7 +475,7 @@ function findOptimalTabs() {
 
     const note = notes[s]![f]!;
 
-    const posVariants = getGuitarFretsFromNote(note, NOTE_KEYS, GUITAR_TUNE);
+    const posVariants = getGuitarFretsFromNote(note, NOTE_KEYS, tuning);
 
     let currentOptimalFret: number | null = null;
     let currentOptimalString: string | null = null;
@@ -467,7 +518,7 @@ function findOptimalTabs() {
   infiniteTabNotes.push(...tabNotes);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
 
   isRenderingUpdates.value = true;
 }
@@ -475,7 +526,7 @@ function findOptimalTabs() {
 /**
  * aligning for each pair in all sequence
  */
-function findOptimalTabs2() {
+function findOptimalTabs2(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   const positions = infiniteTabNotes.map(t => t.getPositions());
   const durations = infiniteTabNotes.map(t => t.getDuration());
 
@@ -485,7 +536,7 @@ function findOptimalTabs2() {
     return null;
   }
 
-  const notes = getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE);
+  const notes = getGuitarNotesMap(NOTE_KEYS, tuning);
 
   const optimizedPos = [];
 
@@ -500,7 +551,7 @@ function findOptimalTabs2() {
 
     const note = notes[s]![f2]!;
 
-    const posVariants = getGuitarFretsFromNote(note, NOTE_KEYS, GUITAR_TUNE);
+    const posVariants = getGuitarFretsFromNote(note, NOTE_KEYS, tuning);
 
     let currentOptimalFret: number | null = null;
     let currentOptimalString: string | null = null;
@@ -545,7 +596,7 @@ function findOptimalTabs2() {
   infiniteTabNotes.push(...tabNotes);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
 
   isRenderingUpdates.value = true;
 }

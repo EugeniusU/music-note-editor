@@ -12,6 +12,15 @@
         <label for='isShowGuitar'>Show guitar?</label>
         <input type='checkbox' name='isShowGuitar' id="isShowGuitar" v-model="isShowGuitarRef">
 
+        <label for='isShowViolin'>Show violin?</label>
+        <input type='checkbox' name='isShowViolin' id="isShowViolin" v-model="isShowViolinRef">
+
+        <span>Select tabs for instrument</span>
+        <select v-model="tabsForInstrument">
+            <option value="guitar">Guitar</option>
+            <option value="violin">Violin</option>
+        </select>
+
         <label>Note Duration</label>
         <select v-model="noteDuration" @change="changeNoteDuration">
             <option value="w">1</option>
@@ -45,6 +54,8 @@ const emit = defineEmits<{
     apply: [];
     selection: [];
     switchShowGuitar: [];
+    switchShowViolin: [];
+    switchTabsForInstrument: [v: TabsForInstruments];
     transpose: [v: number];
     clearAllNotes: [];
     selectAllNotes: [];
@@ -54,17 +65,31 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<{
     isSelection: boolean;
     isShowGuitar: boolean;
+    isShowViolin: boolean;
+    tabsForInstrument: TabsForInstruments;
 }>(), {
     isSelection: false,
     isShowGuitar: true,
+    isShowViolin: false,
+    tabsForInstrument: "guitar",
 });
 
 const noteDuration = ref<NoteDurations>("q");
 const isShowGuitarRef = ref(props.isShowGuitar);
+const isShowViolinRef = ref(props.isShowViolin);
 const transposeInputValue = ref(1);
+const tabsForInstrument = ref<TabsForInstruments>(props.tabsForInstrument);
 
 watch(isShowGuitarRef, () => {
     switchShowGuitar();
+});
+
+watch(isShowViolinRef, () => {
+    switchShowViolin();
+})
+
+watch(tabsForInstrument, () => {
+    switchTabsForInstrument(tabsForInstrument.value);
 });
 
 function play() {
@@ -93,6 +118,14 @@ function selection() {
 
 function switchShowGuitar() {
     emit("switchShowGuitar");
+}
+
+function switchShowViolin() {
+    emit("switchShowViolin");
+}
+
+function switchTabsForInstrument(v: TabsForInstruments) {
+    emit("switchTabsForInstrument", v);
 }
 
 function makeTranspose() {

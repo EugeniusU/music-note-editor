@@ -18,6 +18,13 @@ const GUITAR_TUNE = {
     '6': 'E2',
 } as const;
 
+const VIOLIN_TUNE = {
+    '1': 'E5',
+    '2': 'A4',
+    '3': 'D4',
+    '4': 'G3',
+} as const;
+
 const PIANO_OCTAVES = 6;
 
-export { NOTE_KEYS, DURATION_MAP, GUITAR_TUNE, PIANO_OCTAVES }
+export { NOTE_KEYS, DURATION_MAP, GUITAR_TUNE, PIANO_OCTAVES, VIOLIN_TUNE }
