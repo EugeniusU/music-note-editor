@@ -3,7 +3,7 @@
         <div 
             v-for="(note, i) in pianoKeys"
             :key="i"
-            :class="note.isSharp ? 'sharp' : ''"
+            :class="[note.isSharp ? 'sharp' : '', colorizeCurrentApplied(note), colorizeSelectedNote(note)]"
             @click="handleClickPianoKey(note, i)"
             :style="isOverBounds(i) ? 'background: lightgrey' : ''"
         >{{ note.key + note.octave }}</div>
@@ -13,14 +13,16 @@
 <script setup lang="ts">
 import { GUITAR_TUNE, NOTE_KEYS } from '@/constants/common';
 import { getGuitarNotesMap, getPianoNotes, guitarToPianoRange } from '@/funcs/common';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
     noteDuration?: NoteDurations;
     octaves?: number;
+    selectedNote?: SimpleNoteObj[] | null;
 }>(), {
     noteDuration: "q",
     octaves: 5,
+    selectedNote: null,
 });
 
 const emit = defineEmits<{
@@ -42,6 +44,8 @@ const pianoKeys = computed<NoteObj[]>(() => {
     return notes;
 });
 
+const currentApplied = ref<NoteObj[]>([]);
+
 function handleClickPianoKey(noteObj: NoteObj, index: number) {
     if (isOverBounds(index)) {
         console.warn("disabled");
@@ -49,6 +53,34 @@ function handleClickPianoKey(noteObj: NoteObj, index: number) {
     }
 
     emit("touchNoteKey", noteObj);
+
+    currentApplied.value.push(noteObj);
+
+    setTimeout(() => {
+        const idx = currentApplied.value.findIndex(v => v.key === noteObj.key && v.octave === noteObj.octave);
+
+        if (idx !== -1) {
+            currentApplied.value.splice(idx, 1);
+        }
+    }, 1000);
+}
+
+function colorizeCurrentApplied(n: NoteObj) {
+    if (currentApplied.value.some(v => v.key === n.key && v.octave === n.octave)) {
+        return "currentApplied";
+    }
+
+    return "";
+}
+
+function colorizeSelectedNote(n: NoteObj) {
+    if (props.selectedNote) {
+        if (props.selectedNote.some(v => v.key === n.key && v.octave === n.octave)) {
+            return "currentApplied";
+        }
+    }
+
+    return "";
 }
 
 const range = guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", props.octaves));
@@ -78,5 +110,14 @@ function isOverBounds(index: number) {
 .piano .sharp {
     background: grey;
     color: white;
+}
+
+.piano div:hover {
+    background-color: lightgreen;
+}
+
+.currentApplied {
+    /* background-color: purple; */
+    box-shadow: 1px 1px 15px purple;
 }
 </style>

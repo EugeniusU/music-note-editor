@@ -24,7 +24,7 @@
     <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs</button>
     <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs pairs</button>
 
-    <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" />
+    <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
     <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
 
