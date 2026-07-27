@@ -279,7 +279,7 @@ watch(isSelection, () => {
   }
 });
 
-function enableSelection() {
+function enableSelection(isSequenceSelection = true) {
   const startSelectionPos = ref<{ x: number; y: number } | null>(null);
   const selectedNotes: Element[] = [];
 
@@ -323,6 +323,22 @@ function enableSelection() {
       });
 
       const selectedNotesIdx = selectedNotes.map(e => getNoteIndexFromEl(e));
+
+      if (isSequenceSelection) {
+        if (!selectedNotesIdx.length) {
+          return null;
+        }
+
+        const minIdx = selectedNotesIdx.reduce((a, b) => Math.min(a, b));
+        const maxIdx = selectedNotesIdx.reduce((a, b) => Math.max(a, b));
+
+        selectedNotesIdx.splice(0, selectedNotesIdx.length);
+
+        for (let i = minIdx; i <= maxIdx; i++) {
+          selectedNotesIdx.push(i);
+        }
+      }
+
       currentSelectedNoteIdx.push(...selectedNotesIdx);
     }
   });
