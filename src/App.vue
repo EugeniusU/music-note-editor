@@ -307,8 +307,9 @@ function enableSelection() {
 
       const f = noteEls.value.filter(e => {
         const pos = e.getBoundingClientRect();
+        const offset = 10;
 
-        if (pos.left >= selectionArea.left && pos.right <= selectionArea.right && pos.bottom >= selectionArea.bottom && pos.top <= selectionArea.top) {
+        if ((pos.left + offset) >= selectionArea.left && (pos.right - offset) <= selectionArea.right && (pos.bottom + offset) >= selectionArea.bottom && (pos.top - offset) <= selectionArea.top) {
           return true;
         }
 
