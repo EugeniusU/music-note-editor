@@ -284,10 +284,12 @@ function enableSelection() {
   const selectedNotes: Element[] = [];
 
   outputRef.value?.addEventListener("pointerdown", event => {
+    event.preventDefault();
     startSelectionPos.value = { x: event.clientX, y: event.clientY };
   });
 
   outputRef.value?.addEventListener("pointerup", event => {
+    event.preventDefault();
     resetSelection();
     selectedNotes.splice(0, selectedNotes.length);
 
