@@ -279,51 +279,54 @@ watch(isSelection, () => {
   }
 });
 
-onMounted(() => {
-  factoryInit = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 }});
-  
+function enableSelection() {
   const startSelectionPos = ref<{ x: number; y: number } | null>(null);
   const selectedNotes: Element[] = [];
 
-outputRef.value?.addEventListener("pointerdown", event => {
-  startSelectionPos.value = { x: event.clientX, y: event.clientY };
-});
+  outputRef.value?.addEventListener("pointerdown", event => {
+    startSelectionPos.value = { x: event.clientX, y: event.clientY };
+  });
 
-outputRef.value?.addEventListener("pointerup", event => {
-  resetSelection();
-  selectedNotes.splice(0, selectedNotes.length);
+  outputRef.value?.addEventListener("pointerup", event => {
+    resetSelection();
+    selectedNotes.splice(0, selectedNotes.length);
 
-  const currentPos = { x: event.clientX, y: event.clientY };
+    const currentPos = { x: event.clientX, y: event.clientY };
 
+    if (startSelectionPos.value !== null) {
+      const selectionArea = {
+        left: Math.min(startSelectionPos.value.x, currentPos.x),
+        right: Math.max(startSelectionPos.value.x, currentPos.x),
+        bottom: Math.min(startSelectionPos.value.y, currentPos.y),
+        top: Math.max(startSelectionPos.value.y, currentPos.y),
+      };
 
-  if (startSelectionPos.value !== null) {
-    const selectionArea = {
-      left: Math.min(startSelectionPos.value.x, currentPos.x),
-      right: Math.max(startSelectionPos.value.x, currentPos.x),
-      bottom: Math.min(startSelectionPos.value.y, currentPos.y),
-      top: Math.max(startSelectionPos.value.y, currentPos.y),
-    };
+      const f = noteEls.value.filter(e => {
+        const pos = e.getBoundingClientRect();
 
-    const f = noteEls.value.filter(e => {
-      const pos = e.getBoundingClientRect();
+        if (pos.left >= selectionArea.left && pos.right <= selectionArea.right && pos.bottom >= selectionArea.bottom && pos.top <= selectionArea.top) {
+          return true;
+        }
 
-      if (pos.left >= selectionArea.left && pos.right <= selectionArea.right && pos.bottom >= selectionArea.bottom && pos.top <= selectionArea.top) {
-        return true;
-      }
+        return false;
+      });
 
-      return false;
-    });
+      f.forEach(e => {
+        if (!selectedNotes.includes(e)) {
+          selectedNotes.push(e);
+        }
+      });
 
-    f.forEach(e => {
-      if (!selectedNotes.includes(e)) {
-        selectedNotes.push(e);
-      }
-    });
+      const selectedNotesIdx = selectedNotes.map(e => getNoteIndexFromEl(e));
+      currentSelectedNoteIdx.push(...selectedNotesIdx);
+    }
+  });
+}
 
-    const selectedNotesIdx = selectedNotes.map(e => getNoteIndexFromEl(e));
-    currentSelectedNoteIdx.push(...selectedNotesIdx);
-  }
-});
+onMounted(() => {
+  factoryInit = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 }});
+  
+  enableSelection();
 });
 
 function handlePlay() {
