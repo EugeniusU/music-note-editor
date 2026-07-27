@@ -285,11 +285,13 @@ function enableSelection() {
 
   outputRef.value?.addEventListener("pointerdown", event => {
     event.preventDefault();
+    outputRef.value?.setPointerCapture(event.pointerId);
     startSelectionPos.value = { x: event.clientX, y: event.clientY };
   });
 
   outputRef.value?.addEventListener("pointerup", event => {
     event.preventDefault();
+    outputRef.value?.releasePointerCapture(event.pointerId);
     resetSelection();
     selectedNotes.splice(0, selectedNotes.length);
 
