@@ -2,9 +2,9 @@ import { DURATION_MAP } from "@/constants/common";
 import * as Tone from "tone";
 import type { StaveNote } from "vexflow";
 
-async function play2(infiniteNotes: StaveNote[]) {
+async function play2(infiniteNotes: StaveNote[], bpm = 120) {
     await Tone.start();
-    Tone.getTransport().bpm.value = 120;
+    Tone.getTransport().bpm.value = bpm;
 
     let currentTimePosition = 0;
 

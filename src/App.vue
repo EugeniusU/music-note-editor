@@ -24,6 +24,9 @@
     <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs</button>
     <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs pairs</button>
 
+    <span>BPM for play</span>
+    <input type="number" v-model="bpmValue" />
+
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
     <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
@@ -63,6 +66,7 @@ const isShowViolin = ref(false);
 const outputRef = useTemplateRef('outputRef');
 
 const isViolinTabs = ref(true);
+const bpmValue = ref(120);
 
 let factoryInit : Factory | null = null;
 
@@ -352,7 +356,7 @@ onMounted(() => {
 
 function handlePlay() {
   /// play(toValue(infiniteNotes))
-  play2(toValue(infiniteNotes));
+  play2(toValue(infiniteNotes), bpmValue.value);
 }
 
 function handleSave() {
