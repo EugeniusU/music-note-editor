@@ -27,6 +27,11 @@
     <span>BPM for play</span>
     <input type="number" v-model="bpmValue" />
 
+    <button @click="handleSaveToFile">Save to file</button>
+
+    <label for="loadFile">Load from file</label>
+    <input type="file" id="loadFile" accept=".json" @change="handleLoadFromFile">
+
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
     <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
@@ -670,6 +675,82 @@ function findOptimalTabs2(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
 
   isRenderingUpdates.value = true;
+}
+
+function handleSaveToFile() {
+  const f = (notes: StaveNote[]) => {
+    const fNotes: NoteObj[][] = notes.map(note => {
+        const keyProps = note.getKeyProps();
+        const duration = note.getDuration() as NoteDurations;
+
+        const f = keyProps.map(f => {
+            return { key: f.key, octave: f.octave, duration: duration, isSharp: f.key.includes("#") };
+        });
+
+        return f;
+    });
+
+    const data = [{ date: new Date().toString(), notes: fNotes }];
+
+    return data;
+  };
+
+  const d = f(toValue(infiniteNotes));
+
+  const blob = new Blob([JSON.stringify(d)], {
+    type: "application/json"
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "melody.json";
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function loadFile(file: File) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            resolve(reader.result);
+        };
+
+        reader.onerror = (e) => {
+            reject(e);
+        };
+
+        reader.readAsText(file);
+    })
+}
+
+function handleLoadFromFile(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const files = target.files;
+
+  if (files) {
+    const file = files[0];
+
+    if (file) {
+      loadFile(file)
+      .then(v => {
+        const d = JSON.parse(v as string) as SavedMelody[];
+        const f = d[0];
+
+        if (f) {
+          handleSelected(f);
+        }
+      })
+      .catch(e => {
+        alert("Can not load or parse file");
+        console.error(e);
+      })
+    }
+  }
 }
 
 </script>
