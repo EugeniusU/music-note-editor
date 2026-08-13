@@ -32,6 +32,9 @@
     <label for="loadFile">Load from file</label>
     <input type="file" id="loadFile" accept=".json" @change="handleLoadFromFile">
 
+    <button @click="handleCopyKey">Copy selected</button>
+    <button @click="handlePasteKey">Paste copied</button>
+
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
     <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
@@ -72,6 +75,7 @@ const outputRef = useTemplateRef('outputRef');
 
 const isViolinTabs = ref(true);
 const bpmValue = ref(120);
+const copiedNotes = ref<NoteObj[]>([]);
 
 let factoryInit : Factory | null = null;
 
@@ -357,6 +361,7 @@ onMounted(() => {
   factoryInit = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 }});
   
   enableSelection();
+  enableCopyAndPaste();
 });
 
 function handlePlay() {
@@ -751,6 +756,39 @@ function handleLoadFromFile(event: Event) {
       })
     }
   }
+}
+
+function handleCopyKey() {
+  const idx = currentSelectedNoteIdx;
+  const notes = idx.map(i => infiniteNotes[i]).filter((n) => n !== undefined);
+  const noteObjs = notes.map(n => noteObjFromNote(n));
+
+  copiedNotes.value = noteObjs;
+}
+
+function handlePasteKey() {
+  const notes = copiedNotes.value.map(n => noteObjToStaveNote(n));
+
+  if (!currentSelectedNoteIdx.length) {
+    // if not selected then paste after last exist note
+    infiniteNotes.push(...notes);
+  } else {
+    // if has selection then paste before first selected note
+    const minIdx = currentSelectedNoteIdx.reduce((a, b) => Math.min(a, b));
+    infiniteNotes.splice(minIdx, 0, ...notes);
+  }
+}
+
+function enableCopyAndPaste() {
+  document.addEventListener("keydown", event => {
+    if (event.code === "KeyC" && (event.ctrlKey || event.metaKey)) {
+      handleCopyKey();
+    }
+
+    if (event.code === "KeyV" && (event.ctrlKey || event.metaKey)) {
+      handlePasteKey();
+    }
+  })
 }
 
 </script>
