@@ -76,7 +76,7 @@ const outputRef = useTemplateRef('outputRef');
 
 const isViolinTabs = ref(true);
 const bpmValue = ref(120);
-const copiedNotes = ref<NoteObj[]>([]);
+const copiedNotes = ref<NoteObj[][]>([]);
 
 let factoryInit : Factory | null = null;
 
@@ -762,13 +762,13 @@ function handleLoadFromFile(event: Event) {
 function handleCopyKey() {
   const idx = currentSelectedNoteIdx;
   const notes = idx.map(i => infiniteNotes[i]).filter((n) => n !== undefined);
-  const noteObjs = notes.map(n => noteObjFromNote(n));
+  const noteObjs = notes.map(n => noteObjFromNote2(n));
 
   copiedNotes.value = noteObjs;
 }
 
 function handlePasteKey() {
-  const notes = copiedNotes.value.map(n => noteObjToStaveNote(n));
+  const notes = copiedNotes.value.map(a => makeStaveNote(a.map(n => makeStaveKeyFromNoteObj(n)), a[0]?.duration!));
 
   if (!currentSelectedNoteIdx.length) {
     // if not selected then paste after last exist note
@@ -795,13 +795,13 @@ function enableCopyAndPaste() {
 function handleReverseNotes() {
   const idx = currentSelectedNoteIdx;
   const notes = idx.map(i => infiniteNotes[i]).filter((n) => n !== undefined);
-  const noteObjs = notes.map(n => noteObjFromNote(n));
+  const noteObjs = notes.map(n => noteObjFromNote2(n));
 
   const reversedNoteObjs = noteObjs.reverse();
 
   idx.forEach((id, i) => {
-    const obj = reversedNoteObjs[i] as NoteObj;
-    const note = noteObjToStaveNote(obj);
+    const a = reversedNoteObjs[i] as NoteObj[];
+    const note = makeStaveNote(a.map(makeStaveKeyFromNoteObj), a[0]?.duration!);
 
     infiniteNotes.splice(id, 1, note);
   });
