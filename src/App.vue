@@ -34,6 +34,7 @@
 
     <button @click="handleCopyKey">Copy selected</button>
     <button @click="handlePasteKey">Paste copied</button>
+    <button @click="handleReverseNotes">Reverse selected</button>
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
@@ -789,6 +790,21 @@ function enableCopyAndPaste() {
       handlePasteKey();
     }
   })
+}
+
+function handleReverseNotes() {
+  const idx = currentSelectedNoteIdx;
+  const notes = idx.map(i => infiniteNotes[i]).filter((n) => n !== undefined);
+  const noteObjs = notes.map(n => noteObjFromNote(n));
+
+  const reversedNoteObjs = noteObjs.reverse();
+
+  idx.forEach((id, i) => {
+    const obj = reversedNoteObjs[i] as NoteObj;
+    const note = noteObjToStaveNote(obj);
+
+    infiniteNotes.splice(id, 1, note);
+  });
 }
 
 </script>
