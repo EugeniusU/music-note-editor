@@ -156,6 +156,14 @@ watch(infiniteNotes, async () => {
 
       return n2;
     } 
+
+    if (currentInstrument.value === "piano") {
+      // Required for current logic; this will not rendering
+      const d = n.getDuration();
+      const n2 = new VexFlow.TabNote({ positions: [{ str: 1, fret: 'r' }], duration: d + 'r' }).setFont('Arial', 14, 'bold');
+
+      return n2;
+    }
     
     if (isViolinTabs.value) {
       return f2_makeTab2(noteObjFromNote2(n), VIOLIN_TUNE);
