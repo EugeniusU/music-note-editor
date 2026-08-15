@@ -10,7 +10,7 @@
       :is-selection="isSelection" 
       :is-show-guitar="isShowGuitar"
       :is-show-violin="isShowViolin"
-      :tabs-for-instrument="isViolinTabs ? 'violin' : 'guitar'"
+      :tabs-for-instrument="currentInstrument"
       @switch-show-guitar="handleShowGuitar"
       @switch-show-violin="handleShowViolin"
       @transpose="handleTranspose"
@@ -21,8 +21,8 @@
     />
 
     <button @click="handleTest()">Test</button>
-    <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs</button>
-    <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)">Test optimal tabs pairs</button>
+    <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'">Test optimal tabs</button>
+    <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'">Test optimal tabs pairs</button>
 
     <span>BPM for play</span>
     <input type="number" v-model="bpmValue" />
@@ -77,6 +77,7 @@ const outputRef = useTemplateRef('outputRef');
 const isViolinTabs = ref(true);
 const bpmValue = ref(120);
 const copiedNotes = ref<NoteObj[][]>([]);
+const currentInstrument = ref<TabsForInstruments>("piano");
 
 let factoryInit : Factory | null = null;
 
@@ -166,7 +167,7 @@ watch(infiniteNotes, async () => {
   infiniteTabNotes.push(...tabs);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 });
@@ -428,6 +429,8 @@ function handleShowViolin() {
 }
 
 function handleSwitchTabsForInstrument(v: TabsForInstruments) {
+  currentInstrument.value = v;
+
   if (v === "violin") {
     isViolinTabs.value = true;
   } else {
@@ -455,7 +458,7 @@ function handleSwitchTabsForInstrument(v: TabsForInstruments) {
   infiniteTabNotes.push(...tabs);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 }
@@ -600,7 +603,7 @@ function findOptimalTabs(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   infiniteTabNotes.push(...tabNotes);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 }
@@ -678,7 +681,7 @@ function findOptimalTabs2(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   infiniteTabNotes.push(...tabNotes);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, isViolinTabs.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 }

@@ -19,6 +19,7 @@
         <select v-model="tabsForInstrument">
             <option value="guitar">Guitar</option>
             <option value="violin">Violin</option>
+            <option value="piano">Piano</option>
         </select>
 
         <label>Note Duration</label>

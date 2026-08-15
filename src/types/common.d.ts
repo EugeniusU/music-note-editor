@@ -16,4 +16,4 @@ type SimpleNoteObj = Pick<NoteObj, "key" | "octave">;
 
 type SavedMelody =  { "notes": NoteObj[][], "date": string };
 
-type TabsForInstruments = "guitar" | "violin";
+type TabsForInstruments = "guitar" | "violin" | "piano";

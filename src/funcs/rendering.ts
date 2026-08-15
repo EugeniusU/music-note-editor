@@ -1,6 +1,6 @@
 import { VexFlow, type StaveNote, type TabNote } from "vexflow";
 
-function renderInfinityProgression(containerId: string, allNotes: StaveNote[], allTabs: TabNote[], maxLineWidth = 800, isViolinTabs: boolean) {
+function renderInfinityProgression(containerId: string, allNotes: StaveNote[], allTabs: TabNote[], maxLineWidth = 800, instrument: TabsForInstruments) {
     const div: HTMLDivElement | null = document.getElementById(containerId) as HTMLDivElement | null;
 
     if (!div) {
@@ -62,7 +62,7 @@ function renderInfinityProgression(containerId: string, allNotes: StaveNote[], a
         const rowStaveWidth = maxLineWidth - startX;
 
         const stave = new VexFlow.Stave(startX, currentYNotes, rowStaveWidth);
-        const tabStave = new VexFlow.TabStave(startX, currentYTab, rowStaveWidth, isViolinTabs ? { numLines: 4 } : {});
+        const tabStave = new VexFlow.TabStave(startX, currentYTab, rowStaveWidth, instrument === "violin" ? { numLines: 4 } : {});
 
         stave.setBegBarType(VexFlow.Barline.type.NONE);
         stave.setEndBarType(VexFlow.Barline.type.NONE);
@@ -76,7 +76,10 @@ function renderInfinityProgression(containerId: string, allNotes: StaveNote[], a
         }
 
         stave.setContext(context).draw();
-        tabStave.setContext(context).draw();
+
+        if (instrument !== "piano") {
+            tabStave.setContext(context).draw();
+        }
 
         const numBeats = chunkNotes.length;
 
@@ -93,7 +96,10 @@ function renderInfinityProgression(containerId: string, allNotes: StaveNote[], a
         formatter.format([voice, tabVoice], currentChunkWidth - (isFirstRow ? firstRowWidth : otherRowWidth));
 
         voice.draw(context, stave);
-        tabVoice.draw(context, tabStave);
+
+        if (instrument !== "piano") {
+            tabVoice.draw(context, tabStave);
+        }
 
         // apply note id
         chunkNotes.forEach((note, index) => {
