@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { GUITAR_TUNE, NOTE_KEYS } from '@/constants/common';
+import { GUITAR_TUNE, NOTE_KEYS, VIOLIN_TUNE } from '@/constants/common';
 import { getGuitarNotesMap, getPianoNotes, guitarToPianoRange } from '@/funcs/common';
 import { computed, ref, watch } from 'vue';
 
@@ -19,10 +19,12 @@ const props = withDefaults(defineProps<{
     noteDuration?: NoteDurations;
     octaves?: number;
     selectedNote?: SimpleNoteObj[] | null;
+    selectedInstrument?: TabsForInstruments;
 }>(), {
     noteDuration: "q",
     octaves: 5,
     selectedNote: null,
+    selectedInstrument: "piano",
 });
 
 const emit = defineEmits<{
@@ -83,9 +85,15 @@ function colorizeSelectedNote(n: NoteObj) {
     return "";
 }
 
-const range = guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", props.octaves));
+const rangeRef = computed(() => guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, props.selectedInstrument === "violin" ? VIOLIN_TUNE : GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", props.octaves)));
 
 function isOverBounds(index: number) {
+    if (props.selectedInstrument === "piano") {
+        return false;
+    }
+
+    const range = rangeRef.value;
+
     if (index < range.min.index || index > range.max.index) {
         return true;
     }

@@ -36,7 +36,7 @@
     <button @click="handlePasteKey">Paste copied</button>
     <button @click="handleReverseNotes">Reverse selected</button>
 
-    <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" />
+    <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" :selected-instrument="currentInstrument" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
     <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
 
