@@ -78,6 +78,8 @@ const isViolinTabs = ref(true);
 const bpmValue = ref(120);
 const copiedNotes = ref<NoteObj[][]>([]);
 const currentInstrument = ref<TabsForInstruments>("piano");
+const clientWidth = ref(document.documentElement.clientWidth);
+const currentRendererWidth = computed(() => clientWidth.value - 100);
 
 let factoryInit : Factory | null = null;
 
@@ -175,7 +177,7 @@ watch(infiniteNotes, async () => {
   infiniteTabNotes.push(...tabs);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 });
@@ -302,6 +304,12 @@ watch(isSelection, () => {
   }
 });
 
+watch(currentRendererWidth, (currentWidth, prevWidth) => {
+  if (currentWidth !== prevWidth) {
+    renderInfinityProgression('output', infiniteNotes, infiniteTabNotes, currentWidth, currentInstrument.value);
+  }
+});
+
 function enableSelection(isSequenceSelection = true) {
   const startSelectionPos = ref<{ x: number; y: number } | null>(null);
   const selectedNotes: Element[] = [];
@@ -372,6 +380,7 @@ onMounted(() => {
   
   enableSelection();
   enableCopyAndPaste();
+  enableResize();
 });
 
 function handlePlay() {
@@ -466,7 +475,7 @@ function handleSwitchTabsForInstrument(v: TabsForInstruments) {
   infiniteTabNotes.push(...tabs);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 }
@@ -611,7 +620,7 @@ function findOptimalTabs(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   infiniteTabNotes.push(...tabNotes);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 }
@@ -689,7 +698,7 @@ function findOptimalTabs2(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
   infiniteTabNotes.push(...tabNotes);
   const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, 800, currentInstrument.value);
+  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
 
   isRenderingUpdates.value = true;
 }
@@ -800,6 +809,12 @@ function enableCopyAndPaste() {
     if (event.code === "KeyV" && (event.ctrlKey || event.metaKey)) {
       handlePasteKey();
     }
+  })
+}
+
+function enableResize() {
+  window.addEventListener("resize", _event => {
+    clientWidth.value = document.documentElement.clientWidth;
   })
 }
 
