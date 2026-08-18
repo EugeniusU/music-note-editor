@@ -16,7 +16,7 @@
         <input type='checkbox' name='isShowViolin' id="isShowViolin" v-model="isShowViolinRef">
 
         <span>Select tabs for instrument</span>
-        <select v-model="tabsForInstrument">
+        <select :value="props.tabsForInstrument" @change="e => switchTabsForInstrument(e.target.value)">
             <option value="guitar">Guitar</option>
             <option value="violin">Violin</option>
             <option value="piano">Piano</option>
@@ -79,7 +79,7 @@ const noteDuration = ref<NoteDurations>("q");
 const isShowGuitarRef = ref(props.isShowGuitar);
 const isShowViolinRef = ref(props.isShowViolin);
 const transposeInputValue = ref(1);
-const tabsForInstrument = ref<TabsForInstruments>(props.tabsForInstrument);
+const tabsForInstrumentRef = ref<TabsForInstruments>(props.tabsForInstrument);
 
 watch(isShowGuitarRef, () => {
     switchShowGuitar();
@@ -88,10 +88,6 @@ watch(isShowGuitarRef, () => {
 watch(isShowViolinRef, () => {
     switchShowViolin();
 })
-
-watch(tabsForInstrument, () => {
-    switchTabsForInstrument(tabsForInstrument.value);
-});
 
 function play() {
     emit("play");
@@ -144,5 +140,4 @@ function selectAllNotes() {
 function resetSelection() {
     emit("resetSelection");
 }
-
 </script>

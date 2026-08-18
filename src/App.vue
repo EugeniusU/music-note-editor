@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import VexFlow, { Factory, StaveNote, TabNote, type TabNotePosition } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
-import { computed, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
 import { f2_makeTab2, getGuitarFretsFromNote, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
 import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE } from './constants/common';
 import { renderInfinityProgression } from './funcs/rendering';
@@ -446,38 +446,70 @@ function handleShowViolin() {
 }
 
 function handleSwitchTabsForInstrument(v: TabsForInstruments) {
+  const prevInstrument = currentInstrument.value;
   currentInstrument.value = v;
 
-  if (v === "violin") {
-    isViolinTabs.value = true;
-  } else {
-    isViolinTabs.value = false;
-  }
+  const rangeRef = computed(() => guitarToPianoRange(getGuitarNotesMap(NOTE_KEYS, v === "violin" ? VIOLIN_TUNE : GUITAR_TUNE, 24), getPianoNotes(NOTE_KEYS, "C", PIANO_OCTAVES)));
 
-  const infiniteNotesCopy = toValue(infiniteNotes);
-  infiniteTabNotes.splice(0, infiniteTabNotes.length);
-
-  const tabs = infiniteNotesCopy.map(n => {
-    if (n.isRest()) {
-      const d = n.getDuration();
-      const n2 = new VexFlow.TabNote({ positions: [{ str: 1, fret: 'r' }], duration: d + 'r' }).setFont('Arial', 14, 'bold');
-
-      return n2;
-    } 
-    
-    if (isViolinTabs.value) {
-      return f2_makeTab2(noteObjFromNote2(n), VIOLIN_TUNE);
+  function isOverBounds(index: number) {
+    if (v === "piano") {
+        return false;
     }
 
-    return f2_makeTab2(noteObjFromNote2(n), GUITAR_TUNE);
-  });
+    const range = rangeRef.value;
 
-  infiniteTabNotes.push(...tabs);
-  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
+    if (index < range.min.index || index > range.max.index) {
+        return true;
+    }
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
+    return false;
+  }
 
-  isRenderingUpdates.value = true;
+  const notes = infiniteNotes.map(n => noteObjFromNote2(n));
+  const pianoNotes = getPianoNotes(NOTE_KEYS, "C", PIANO_OCTAVES);
+  const idx = notes.map(a => a.map(n => pianoNotes.indexOf(n.key + n.octave))).flat();
+
+  const minIdx = Math.min(...idx);
+  const maxIdx = Math.max(...idx);
+
+  if (infiniteNotes.length && (isOverBounds(minIdx) || isOverBounds(maxIdx))) {
+    alert("Instrument switching produce notes out of range");
+
+    nextTick().then(() => {
+       currentInstrument.value = prevInstrument;
+    })
+  } else {
+    if (v === "violin") {
+      isViolinTabs.value = true;
+    } else {
+      isViolinTabs.value = false;
+    }
+
+    const infiniteNotesCopy = toValue(infiniteNotes);
+    infiniteTabNotes.splice(0, infiniteTabNotes.length);
+
+    const tabs = infiniteNotesCopy.map(n => {
+      if (n.isRest()) {
+        const d = n.getDuration();
+        const n2 = new VexFlow.TabNote({ positions: [{ str: 1, fret: 'r' }], duration: d + 'r' }).setFont('Arial', 14, 'bold');
+
+        return n2;
+      } 
+    
+      if (isViolinTabs.value) {
+        return f2_makeTab2(noteObjFromNote2(n), VIOLIN_TUNE);
+      }
+
+      return f2_makeTab2(noteObjFromNote2(n), GUITAR_TUNE);
+    });
+
+    infiniteTabNotes.push(...tabs);
+    const infiniteTabNotesCopy = toValue(infiniteTabNotes);
+
+    renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
+
+    isRenderingUpdates.value = true;
+  }
 }
 
 function makeStaveKeyFromNoteObj(n: NoteObj): string {
