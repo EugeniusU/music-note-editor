@@ -16,7 +16,7 @@
         <input type='checkbox' name='isShowViolin' id="isShowViolin" v-model="isShowViolinRef">
 
         <span>Select tabs for instrument</span>
-        <select :value="props.tabsForInstrument" @change="e => switchTabsForInstrument(e.target.value)">
+        <select :value="props.tabsForInstrument" @change="handleSelectEvent">
             <option value="guitar">Guitar</option>
             <option value="violin">Violin</option>
             <option value="piano">Piano</option>
@@ -139,5 +139,11 @@ function selectAllNotes() {
 
 function resetSelection() {
     emit("resetSelection");
+}
+
+function handleSelectEvent(e: Event) {
+    const v = (e.target as HTMLSelectElement).value;
+
+    switchTabsForInstrument(v as TabsForInstruments);
 }
 </script>
