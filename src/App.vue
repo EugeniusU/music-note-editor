@@ -314,16 +314,22 @@ function enableSelection(isSequenceSelection = true) {
   const startSelectionPos = ref<{ x: number; y: number } | null>(null);
   const selectedNotes: Element[] = [];
 
+  // reset all selection only on special event
+  outputRef.value?.addEventListener("dblclick", event => {
+    event.preventDefault();
+    resetSelection();
+  });
+
   outputRef.value?.addEventListener("pointerdown", event => {
     event.preventDefault();
     outputRef.value?.setPointerCapture(event.pointerId);
     startSelectionPos.value = { x: event.clientX, y: event.clientY };
   });
 
+  // removing reset from this block allow keep exist and make new selection
   outputRef.value?.addEventListener("pointerup", event => {
     event.preventDefault();
     outputRef.value?.releasePointerCapture(event.pointerId);
-    resetSelection();
     selectedNotes.splice(0, selectedNotes.length);
 
     const currentPos = { x: event.clientX, y: event.clientY };
@@ -347,9 +353,13 @@ function enableSelection(isSequenceSelection = true) {
         return false;
       });
 
+      // allows unselect notes that touched again
       f.forEach(e => {
-        if (!selectedNotes.includes(e)) {
+        if (!selectedNotes.includes(e) && !currentSelectedNoteEls.value.includes(e)) {
           selectedNotes.push(e);
+        }  else {
+          const idx = currentSelectedNoteEls.value.indexOf(e);
+          currentSelectedNoteIdx.splice(idx, 1);
         }
       });
 
