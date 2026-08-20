@@ -307,6 +307,8 @@ watch(isSelection, () => {
 watch(currentRendererWidth, (currentWidth, prevWidth) => {
   if (currentWidth !== prevWidth) {
     renderInfinityProgression('output', infiniteNotes, infiniteTabNotes, currentWidth, currentInstrument.value);
+
+    isRenderingUpdates.value = true;
   }
 });
 
