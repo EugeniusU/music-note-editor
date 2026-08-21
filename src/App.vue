@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import VexFlow, { Factory, StaveNote, TabNote, type TabNotePosition } from 'vexflow';
 import PianoKeys from './components/PianoKeys.vue';
-import { computed, nextTick, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, shallowReactive, useTemplateRef, watch } from 'vue';
 import { f2_makeTab2, getGuitarFretsFromNote, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
 import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE } from './constants/common';
 import { renderInfinityProgression, renderInfinityProgressionWithCb } from './funcs/rendering';
@@ -148,10 +148,7 @@ function handleTouchNote(note: NoteObj) {
 const isRenderingUpdates = ref(false);
 
 watch(infiniteNotes, async () => {
-  const infiniteNotesCopy = toValue(infiniteNotes);
-  infiniteTabNotes.splice(0, infiniteTabNotes.length);
-
-  const tabs = infiniteNotesCopy.map(n => {
+  const tabs = infiniteNotes.map(n => {
     if (n.isRest()) {
       const d = n.getDuration();
       const n2 = new VexFlow.TabNote({ positions: [{ str: 1, fret: 'r' }], duration: d + 'r' }).setFont('Arial', 14, 'bold');
@@ -174,6 +171,7 @@ watch(infiniteNotes, async () => {
     return f2_makeTab2(noteObjFromNote2(n), GUITAR_TUNE);
   });
 
+  infiniteTabNotes.splice(0, infiniteTabNotes.length);
   infiniteTabNotes.push(...tabs);
 
   renderInfinityProgressionWrap();
@@ -392,11 +390,11 @@ onMounted(() => {
 
 function handlePlay() {
   /// play(toValue(infiniteNotes))
-  play2(toValue(infiniteNotes), bpmValue.value);
+  play2(infiniteNotes, bpmValue.value);
 }
 
 function handleSave() {
-  saveData(toValue(infiniteNotes));
+  saveData(infiniteNotes);
 }
 
 function handleLoad() {
@@ -423,7 +421,7 @@ function handleApply() {
   const changeNoteDuration = noteObjs2.map(n => ({ index: n.index, note: {...n.note, duration: currentDuration.value } }));
   const fNotes = changeNoteDuration.map(n => ({ index: n.index, note: noteObjToStaveNote(n.note) }))
 
-  const newNotes = replaceNotes(toValue(infiniteNotes), fNotes);
+  const newNotes = replaceNotes(infiniteNotes, fNotes);
 
   infiniteNotes.splice(0, infiniteNotes.length);
   infiniteNotes.push(...newNotes);
@@ -492,10 +490,7 @@ function handleSwitchTabsForInstrument(v: TabsForInstruments) {
       isViolinTabs.value = false;
     }
 
-    const infiniteNotesCopy = toValue(infiniteNotes);
-    infiniteTabNotes.splice(0, infiniteTabNotes.length);
-
-    const tabs = infiniteNotesCopy.map(n => {
+    const tabs = infiniteNotes.map(n => {
       if (n.isRest()) {
         const d = n.getDuration();
         const n2 = new VexFlow.TabNote({ positions: [{ str: 1, fret: 'r' }], duration: d + 'r' }).setFont('Arial', 14, 'bold');
@@ -510,6 +505,7 @@ function handleSwitchTabsForInstrument(v: TabsForInstruments) {
       return f2_makeTab2(noteObjFromNote2(n), GUITAR_TUNE);
     });
 
+    infiniteTabNotes.splice(0, infiniteTabNotes.length);
     infiniteTabNotes.push(...tabs);
 
     renderInfinityProgressionWrap();
@@ -550,7 +546,7 @@ function handleTranspose(offset: number) {
   }
 
   const transposedNotes = noteObjs.map(n => ({ index: n.index, note: makeStaveNote(noteObjFromNote2(n.note).map(obj => transpose2(obj, offset)).map(makeStaveKeyFromNoteObj), n.note.getDuration()) }));
-  const newNotes = replaceNotes(toValue(infiniteNotes), transposedNotes);
+  const newNotes = replaceNotes(infiniteNotes, transposedNotes);
 
   infiniteNotes.splice(0, infiniteNotes.length);
   infiniteNotes.push(...newNotes);
@@ -747,7 +743,7 @@ function handleSaveToFile() {
     return data;
   };
 
-  const d = f(toValue(infiniteNotes));
+  const d = f(infiniteNotes);
 
   const blob = new Blob([JSON.stringify(d)], {
     type: "application/json"
