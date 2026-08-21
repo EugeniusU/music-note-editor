@@ -1,6 +1,6 @@
 import { VexFlow, type StaveNote, type TabNote } from "vexflow";
 
-function renderInfinityProgression(containerId: string, allNotes: StaveNote[], allTabs: TabNote[], maxLineWidth = 800, instrument: TabsForInstruments) {
+function renderInfinityProgression(containerId: string, allNotes: StaveNote[], allTabs: TabNote[], maxLineWidth: number, instrument: TabsForInstruments) {
     const div: HTMLDivElement | null = document.getElementById(containerId) as HTMLDivElement | null;
 
     if (!div) {
@@ -135,4 +135,10 @@ function renderInfinityProgression(containerId: string, allNotes: StaveNote[], a
     renderer.resize(maxLineWidth, finalCanvasHeight);
 }
 
-export { renderInfinityProgression }
+const renderInfinityProgressionWithCb = (containerId: string, notes: StaveNote[], tabs: TabNote[], maxLineWidth: number, instrument: TabsForInstruments, cb: () => void) => {
+  renderInfinityProgression(containerId, notes, tabs, maxLineWidth, instrument);
+
+  cb();
+};
+
+export { renderInfinityProgression, renderInfinityProgressionWithCb }

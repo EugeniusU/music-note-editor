@@ -54,7 +54,7 @@ import PianoKeys from './components/PianoKeys.vue';
 import { computed, nextTick, onMounted, ref, shallowReactive, toValue, useTemplateRef, watch } from 'vue';
 import { f2_makeTab2, getGuitarFretsFromNote, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
 import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE } from './constants/common';
-import { renderInfinityProgression } from './funcs/rendering';
+import { renderInfinityProgression, renderInfinityProgressionWithCb } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
 import { play2 } from './funcs/play';
 import GuitarKeys from './components/GuitarKeys.vue';
@@ -175,11 +175,8 @@ watch(infiniteNotes, async () => {
   });
 
   infiniteTabNotes.push(...tabs);
-  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
-
-  isRenderingUpdates.value = true;
+  renderInfinityProgressionWrap();
 });
 
 const noteEls = computed(() => {
@@ -306,9 +303,7 @@ watch(isSelection, () => {
 
 watch(currentRendererWidth, (currentWidth, prevWidth) => {
   if (currentWidth !== prevWidth) {
-    renderInfinityProgression('output', infiniteNotes, infiniteTabNotes, currentWidth, currentInstrument.value);
-
-    isRenderingUpdates.value = true;
+    renderInfinityProgressionWrap();
   }
 });
 
@@ -516,11 +511,8 @@ function handleSwitchTabsForInstrument(v: TabsForInstruments) {
     });
 
     infiniteTabNotes.push(...tabs);
-    const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-    renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
-
-    isRenderingUpdates.value = true;
+    renderInfinityProgressionWrap();
   }
 }
 
@@ -658,15 +650,10 @@ function findOptimalTabs(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
     return n2;
   });
 
-  const infiniteNotesCopy = toValue(infiniteNotes);
   infiniteTabNotes.splice(0, infiniteTabNotes.length);
-
   infiniteTabNotes.push(...tabNotes);
-  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
-
-  isRenderingUpdates.value = true;
+  renderInfinityProgressionWrap();
 }
 
 /**
@@ -736,15 +723,10 @@ function findOptimalTabs2(tuning: typeof GUITAR_TUNE | typeof VIOLIN_TUNE) {
     return n2;
   });
 
-  const infiniteNotesCopy = toValue(infiniteNotes);
   infiniteTabNotes.splice(0, infiniteTabNotes.length);
-
   infiniteTabNotes.push(...tabNotes);
-  const infiniteTabNotesCopy = toValue(infiniteTabNotes);
 
-  renderInfinityProgression('output', infiniteNotesCopy, infiniteTabNotesCopy, currentRendererWidth.value, currentInstrument.value);
-
-  isRenderingUpdates.value = true;
+  renderInfinityProgressionWrap();
 }
 
 function handleSaveToFile() {
@@ -874,6 +856,14 @@ function handleReverseNotes() {
     const note = makeStaveNote(a.map(makeStaveKeyFromNoteObj), a[0]?.duration!);
 
     infiniteNotes.splice(id, 1, note);
+  });
+}
+
+const renderInfinityProgressionWrap = () => {
+  const args: Parameters<typeof renderInfinityProgression> = ["output", infiniteNotes, infiniteTabNotes, currentRendererWidth.value, currentInstrument.value];
+
+  renderInfinityProgressionWithCb(...args, () => {
+    isRenderingUpdates.value = true;
   });
 }
 
