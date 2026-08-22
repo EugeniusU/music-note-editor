@@ -12,9 +12,10 @@ const listeners = new WeakMap<HTMLElement, EventListener>();
 
 export default {
     mounted: (el, binding) => {
+        const prevColor = el.style.backgroundColor;
+
         const handler = () => {
             const { color, durationMs } =  { color: "green", durationMs: 1000, ...binding.value };
-            const prevColor = el.style.backgroundColor;
 
             el.style.backgroundColor = color;
 
