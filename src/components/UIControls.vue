@@ -1,13 +1,13 @@
 <template>
     <div class='controls'>
-        <button id='play' @click="play()">Play</button>
+        <button id='play' @click="play()" v-colorize>Play</button>
         <button id='stop'>Stop</button>
         <button id='reset'>Reset</button>
-        <button id='save' @click="save()">Save</button>
-        <button id='load' @click="load()">Load</button>
+        <button id='save' @click="save()" v-colorize>Save</button>
+        <button id='load' @click="load()" v-colorize>Load</button>
         <button id='testSelection' @click="selection()" :style="{ backgroundColor: isSelection ? 'lightgreen' : '' }">testSelection</button>
-        <button @click="selectAllNotes()">Select all notes</button>
-        <button @click="resetSelection()">Reset selection</button>
+        <button @click="selectAllNotes()" v-colorize>Select all notes</button>
+        <button @click="resetSelection()" v-colorize>Reset selection</button>
 
         <label for='isShowGuitar'>Show guitar?</label>
         <input type='checkbox' name='isShowGuitar' id="isShowGuitar" v-model="isShowGuitarRef">
@@ -16,14 +16,14 @@
         <input type='checkbox' name='isShowViolin' id="isShowViolin" v-model="isShowViolinRef">
 
         <span>Select tabs for instrument</span>
-        <select :value="props.tabsForInstrument" @change="handleSelectEvent">
+        <select :value="props.tabsForInstrument" @change="handleSelectEvent" v-colorize>
             <option value="guitar">Guitar</option>
             <option value="violin">Violin</option>
             <option value="piano">Piano</option>
         </select>
 
         <label>Note Duration</label>
-        <select v-model="noteDuration" @change="changeNoteDuration">
+        <select v-model="noteDuration" @change="changeNoteDuration" v-colorize>
             <option value="w">1</option>
             <option value="h">1/2</option>
             <option value="q">1/4</option>
@@ -35,12 +35,12 @@
 
         <label>Transpose</label>
         <input type='number' min='-24' max='24' step='1' v-model="transposeInputValue">
-        <button id='transposeButton' @click="makeTranspose">make</button>
+        <button id='transposeButton' @click="makeTranspose" v-colorize>make</button>
 
         <label>Apply changes</label>
-        <button id='apply' @click="apply()">Apply</button>
+        <button id='apply' @click="apply()" v-colorize>Apply</button>
 
-        <button @click="clearAllNotes()">Clear all notes</button>
+        <button @click="clearAllNotes()" v-colorize>Clear all notes</button>
     </div>
 </template>
 

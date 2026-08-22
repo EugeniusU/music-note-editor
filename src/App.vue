@@ -20,9 +20,9 @@
       @switch-tabs-for-instrument="handleSwitchTabsForInstrument"
     />
 
-    <button @click="handleTest()">Test</button>
-    <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'">Test optimal tabs</button>
-    <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'">Test optimal tabs pairs</button>
+    <button @click="handleTest()" v-colorize>Test</button>
+    <button @click="findOptimalTabs(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'" v-colorize>Test optimal tabs</button>
+    <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'" v-colorize>Test optimal tabs pairs</button>
 
     <span>BPM for play</span>
     <input type="number" v-model="bpmValue" />
@@ -32,9 +32,9 @@
     <label for="loadFile">Load from file</label>
     <input type="file" id="loadFile" accept=".json" @change="handleLoadFromFile">
 
-    <button @click="handleCopyKey">Copy selected</button>
-    <button @click="handlePasteKey">Paste copied</button>
-    <button @click="handleReverseNotes">Reverse selected</button>
+    <button @click="handleCopyKey" v-colorize>Copy selected</button>
+    <button @click="handlePasteKey" v-colorize>Paste copied</button>
+    <button @click="handleReverseNotes" v-colorize>Reverse selected</button>
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" :selected-instrument="currentInstrument" />
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
