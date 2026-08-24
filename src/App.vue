@@ -40,7 +40,7 @@
     <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
     <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
 
-    <div id="output" ref="outputRef"></div>
+    <div id="output" ref="outputRef" :class="isSelectionMode"></div>
 
     <LoadSaved v-if="isShowList" @select-item="handleSelected" @close-list="handleCloseList" />
 
@@ -80,6 +80,7 @@ const copiedNotes = ref<NoteObj[][]>([]);
 const currentInstrument = ref<TabsForInstruments>("piano");
 const clientWidth = ref(document.documentElement.clientWidth);
 const currentRendererWidth = computed(() => clientWidth.value - 100);
+const isSelectionMode = computed(() => isSelection.value ? "selectionMode" : "")
 
 let factoryInit : Factory | null = null;
 
@@ -294,7 +295,7 @@ watch(isSelection, () => {
     } else {
       outputRef.value.removeEventListener("mouseover", applySelectionEvent);
 
-      resetSelection();
+      // resetSelection();
     }
   }
 });
@@ -376,6 +377,30 @@ function enableSelection(isSequenceSelection = true) {
       }
 
       currentSelectedNoteIdx.push(...selectedNotesIdx);
+    }
+  });
+
+  let hasPointer = false;
+  let touchstartMs = 0;
+
+  outputRef.value?.addEventListener("touchstart", event => {
+    touchstartMs = performance.now();
+    hasPointer = true;
+
+    setTimeout(() => {
+      if (hasPointer) {
+        isSelection.value = true;
+      }
+    }, 500);
+  });
+
+  outputRef.value?.addEventListener("touchend", event => {
+    hasPointer = false;
+
+    if (performance.now() - touchstartMs > 1000) {
+      isSelection.value = true;
+    } else {
+      isSelection.value = false;
     }
   });
 }
@@ -876,6 +901,11 @@ svg .vf-tabnote {
 
 #output {
     margin-top: 100px;
+}
+
+.selectionMode {
+  touch-action: none;
+  background-color: rgb(222, 253, 222);
 }
 
 .guitar .guitar_string {
