@@ -7,7 +7,7 @@
         >
 
             <div class="guitar_string" :string="i" :openStringNote="string" >
-                <div class="guitar_string_open" @click="handleClickGuitarKey(0, i)" :class="currentSelectedFret !== null && currentSelectedFret[i] === 0 ? 'currentApplied' : ''" >
+                <div class="guitar_string_open" @click="handleOnClickFret(0, i)" :class="currentSelectedFret !== null && currentSelectedFret[i] === 0 ? 'currentApplied' : ''" >
                     {{ string }}
                 </div>
 
@@ -17,14 +17,14 @@
                     v-for="(fret, j) in MAX_FRET"
                     :key="j"
                     class="guitar_fret"
-                    @click="handleClickGuitarKey(fret, i)"
+                    @click="handleOnClickFret(fret, i)"
                     
                     @mouseenter="showNoteFromFretMap(true, i, fret)"
                     @mouseleave="showNoteFromFretMap(false, i, fret)"
                     
                    :class="currentSelectedFret !== null && currentSelectedFret[i] === fret ? 'currentApplied' : ''" 
                 >
-                    {{ isShowNoteFromFretHintMap[i]?.[fret] ? getNoteFromGuitarFret(fret, i) : "" }}
+                    {{ isShowNoteFromFretHintMap[i]?.[fret] ? getNoteFromFret(fret, i) : "" }}
                     <span v-if="i === '1'">{{ fret }}</span>
                 </div>   
             </div>
@@ -58,8 +58,8 @@ const emit = defineEmits<{
 
 const currentApplied = ref("");
 
-function handleClickGuitarKey(fret: number, string: keyof InstrumentTuning) {
-    const noteKey = getNoteFromGuitarFret(fret, string);
+function handleOnClickFret(fret: number, string: keyof InstrumentTuning) {
+    const noteKey = getNoteFromFret(fret, string);
     const octave = noteKey.split("").find(s => !isNaN(Number(s))) || 1;
     const key = noteKey.split("").filter(s => isNaN(Number(s))).join("");
 
@@ -80,7 +80,7 @@ function showNoteFromFretMap(f: boolean, stringNum: string, fretNum: number) {
     isShowNoteFromFretHintMap.value[stringNum] = { [fretNum]: f };
 }
 
-function getNoteFromGuitarFret(fret: number, string: keyof InstrumentTuning) {
+function getNoteFromFret(fret: number, string: keyof InstrumentTuning) {
     const openStringNote = props.instrumentTuning[string];
     const pianoNotes = getPianoNotes(NOTE_KEYS, "C", PIANO_OCTAVES);
 
