@@ -37,8 +37,16 @@
     <button @click="handleReverseNotes" v-colorize>Reverse selected</button>
 
     <PianoKeys @touch-note-key="handleTouchNote" :octaves="PIANO_OCTAVES" :selected-note="firstSelectedNoteKey" :selected-instrument="currentInstrument" />
-    <GuitarKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowGuitar"  />
-    <ViolinKeys @touch-fret-key="handleTouchNote" :note-duration="currentDuration" :selected-note="firstSelectedNoteKey" v-show="isShowViolin" />
+
+    <StringInstrument 
+      v-for="(instrument, i) in instruments"
+      :key="i"
+      @touch-fret-key="handleTouchNote" 
+      :note-duration="currentDuration" 
+      :selected-note="firstSelectedNoteKey" 
+      v-show="isShowInstrument(instrument)" 
+      :instrument-tuning="instrument.tuning"
+    />
 
     <div id="output" ref="outputRef" :class="isSelectionMode"></div>
 
@@ -57,9 +65,8 @@ import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE } from './constants/
 import { renderInfinityProgression, renderInfinityProgressionWithCb } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
 import { play2 } from './funcs/play';
-import GuitarKeys from './components/GuitarKeys.vue';
 import LoadSaved from './components/LoadSaved.vue';
-import ViolinKeys from './components/ViolinKeys.vue';
+import StringInstrument from './components/StringInstrument.vue';
 
 
 const infiniteNotes = shallowReactive<StaveNote[]>([]);
@@ -80,7 +87,22 @@ const copiedNotes = ref<NoteObj[][]>([]);
 const currentInstrument = ref<TabsForInstruments>("piano");
 const clientWidth = ref(document.documentElement.clientWidth);
 const currentRendererWidth = computed(() => clientWidth.value - 100);
-const isSelectionMode = computed(() => isSelection.value ? "selectionMode" : "")
+const isSelectionMode = computed(() => isSelection.value ? "selectionMode" : "");
+
+const instruments = [
+  { name: "guitar", tuning: GUITAR_TUNE },
+  { name: "violin", tuning: VIOLIN_TUNE }
+];
+
+const isShowInstrument = (instrument: typeof instruments[number]) => {
+  if (instrument.name === "guitar") {
+    return isShowGuitar.value;
+  } else if (instrument.name === "violin") {
+    return isShowViolin.value;
+  } else {
+    return false;
+  }
+};
 
 let factoryInit : Factory | null = null;
 
