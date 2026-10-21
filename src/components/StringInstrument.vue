@@ -102,7 +102,7 @@ const currentSelectedFret = computed(() => {
             const key = n.key;
             const octave = n.octave;
 
-            const f = getGuitarFretsFromNote(key + octave, NOTE_KEYS, VIOLIN_TUNE);
+            const f = getGuitarFretsFromNote(key + octave, NOTE_KEYS, props.instrumentTuning);
 
             const ks = Object.keys(f);
 
