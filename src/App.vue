@@ -25,7 +25,7 @@
     <button @click="findOptimalTabs2(isViolinTabs ? VIOLIN_TUNE : GUITAR_TUNE)" :disabled="currentInstrument === 'piano'" v-colorize>Test optimal tabs pairs</button>
 
     <span>BPM for play</span>
-    <input type="number" v-model="bpmValue" />
+    <input type="number" v-model="bpmValue" min="10" max="1000" step="10" @input="validateBPMValue" />
 
     <button @click="handleSaveToFile">Save to file</button>
 
@@ -61,7 +61,7 @@ import VexFlow, { Factory, StaveNote, TabNote, type TabNotePosition } from 'vexf
 import PianoKeys from './components/PianoKeys.vue';
 import { computed, nextTick, onMounted, ref, shallowReactive, useTemplateRef, watch } from 'vue';
 import { f2_makeTab2, getGuitarFretsFromNote, getGuitarNotesMap, getNoteIndexFromEl, getPianoNotes, guitarToPianoRange, isSafeTransposing, isSVGNode, loadData, makeCMajor, noteObjFromNote, noteObjFromNote2, replaceNotes, saveData, transpose, transpose2 } from './funcs/common';
-import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE } from './constants/common';
+import { GUITAR_TUNE, NOTE_KEYS, PIANO_OCTAVES, VIOLIN_TUNE, DEFAULT_BPM_VALUE } from './constants/common';
 import { renderInfinityProgression, renderInfinityProgressionWithCb } from './funcs/rendering';
 import UIControls from './components/UIControls.vue';
 import { play2 } from './funcs/play';
@@ -82,7 +82,18 @@ const isShowViolin = ref(false);
 const outputRef = useTemplateRef('outputRef');
 
 const isViolinTabs = ref(true);
-const bpmValue = ref(120);
+const bpmValue = ref(DEFAULT_BPM_VALUE);
+
+const validateBPMValue = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const value = input.valueAsNumber;
+
+  if (input.value === "" || !Number.isFinite(value) || value < 10 || value > 1000) {
+    bpmValue.value = DEFAULT_BPM_VALUE;
+    input.value = String(DEFAULT_BPM_VALUE);
+  }
+}
+
 const copiedNotes = ref<NoteObj[][]>([]);
 const currentInstrument = ref<TabsForInstruments>("piano");
 const clientWidth = ref(document.documentElement.clientWidth);
