@@ -1,22 +1,22 @@
 <template>
-    <div class='guitar'>
+    <div class='stringInstrument'>
         <div 
             v-for="(string, i) in instrumentTuning"
             :key="i"   
             
         >
 
-            <div class="guitar_string" :string="i" :openStringNote="string" >
-                <div class="guitar_string_open" @click="handleOnClickFret(0, i)" :class="currentSelectedFret !== null && currentSelectedFret[i] === 0 ? 'currentApplied' : ''" >
+            <div class="stringInstrument_string" :string="i" :openStringNote="string" >
+                <div class="stringInstrument_string_open" @click="handleOnClickFret(0, i)" :class="currentSelectedFret !== null && currentSelectedFret[i] === 0 ? 'currentApplied' : ''" >
                     {{ string }}
                 </div>
 
-                <div class="guitar_string_line"></div>
+                <div class="stringInstrument_string_line"></div>
 
                 <div 
                     v-for="(fret, j) in MAX_FRET"
                     :key="j"
-                    class="guitar_fret"
+                    class="stringInstrument_fret"
                     @click="handleOnClickFret(fret, i)"
                     
                     @mouseenter="showNoteFromFretMap(true, i, fret)"
@@ -123,12 +123,12 @@ const currentSelectedFret = computed(() => {
 
 </script>
 <style>
-.guitar .guitar_string {
+.stringInstrument .stringInstrument_string {
     display: flex;
     margin-top: 15px;
 }
 
-.guitar_string .guitar_fret {
+.stringInstrument_string .stringInstrument_fret {
     min-width: 70px;
     border-right: 1px solid purple;
     text-align: center;
@@ -138,11 +138,11 @@ const currentSelectedFret = computed(() => {
     position: relative;
 }
 
-.guitar_string .guitar_fret:hover {
+.stringInstrument_string .stringInstrument_fret:hover {
     background-color: lightgreen;
 }
 
-.guitar_string_line {
+.stringInstrument_string_line {
     position: absolute;
     width: 100%;
     height: 3px;
@@ -150,7 +150,7 @@ const currentSelectedFret = computed(() => {
     margin-top: 10px;
 }
 
-.guitar_string_open {
+.stringInstrument_string_open {
     min-width: 50px;
     border-right: 1px solid deeppink;
     position: relative;
@@ -158,11 +158,11 @@ const currentSelectedFret = computed(() => {
     min-height: 35px;
 }
 
-.guitar_string_open:hover {
+.stringInstrument_string_open:hover {
     background-color: lightgreen;
 }
 
-.guitar_fret span {
+.stringInstrument_fret span {
     position: relative;
     top: -10px;
 }
