@@ -317,4 +317,14 @@ function isSafeTransposing(n: NoteObj, offset: number, minIndex: number, maxInde
   return true;
 }
 
-export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange, transpose, transpose2, isSafeTransposing }
+const validateNumberValue = (e: Event, rule: ValidateRule) => {
+  const input = e.target as HTMLInputElement;
+  const value = input.valueAsNumber;
+
+  if (input.value === "" || !Number.isFinite(value) || value < rule.min || value > rule.max) {
+    rule.vRef.value = rule.default;
+    input.value = String(rule.default);
+  }
+}
+
+export { getGuitarFretsFromNote, getGuitarNotesMap, getPianoNotes, loadData, saveData, getNoteIndexFromEl, replaceNotes, noteObjFromNote, f2_makeTab2, noteObjFromNote2, isSVGNode, makeCMajor, guitarToPianoRange, transpose, transpose2, isSafeTransposing, validateNumberValue }

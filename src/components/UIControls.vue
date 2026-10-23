@@ -34,7 +34,7 @@
         <button id='pause'>Pause</button>
 
         <label>Transpose</label>
-        <input type='number' min='-24' max='24' step='1' v-model="transposeInputValue">
+        <input type='number' min='-24' max='24' step='1' v-model="transposeInputValue" @change="e => validateNumberValue(e, transposeRule)">
         <button id='transposeButton' @click="makeTranspose" v-colorize>make</button>
 
         <label>Apply changes</label>
@@ -46,6 +46,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { validateNumberValue } from '@/funcs/common';
 
 const emit = defineEmits<{
     play: [];
@@ -79,6 +80,7 @@ const noteDuration = ref<NoteDurations>("q");
 const isShowGuitarRef = ref(props.isShowGuitar);
 const isShowViolinRef = ref(props.isShowViolin);
 const transposeInputValue = ref(1);
+const transposeRule: ValidateRule = { min: -24, max: 24, default: 1, vRef: transposeInputValue };
 const tabsForInstrumentRef = ref<TabsForInstruments>(props.tabsForInstrument);
 
 watch(isShowGuitarRef, () => {

@@ -19,3 +19,5 @@ type SavedMelody =  { "notes": NoteObj[][], "date": string };
 type TabsForInstruments = "guitar" | "violin" | "piano";
 
 type InstrumentTuning = { [key: string]: string };
+
+type ValidateRule = { min: number, max: number, default: number, vRef: Ref<number> };
